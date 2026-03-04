@@ -30,12 +30,12 @@ export async function listarDespesas(id_empresa) {
 
 
 // ✅ Buscar despesa por ID
-export async function buscarDespesaPorId(id, id_empresa) {
+export async function buscarDespesaPorId(id_despesa, id_empresa) {
 
   const [rows] = await connection.execute(
     `SELECT * FROM Despesa
-     WHERE id = ? AND id_empresa = ? AND apagado = 0`,
-    [id, id_empresa]
+     WHERE id_despesa = ? AND id_empresa = ? AND apagado = 0`,
+    [id_despesa, id_empresa]
   );
 
   return rows[0];
@@ -43,12 +43,12 @@ export async function buscarDespesaPorId(id, id_empresa) {
 
 
 // 🔒 Atualizar despesa
-export async function actualizarDespesa(id, id_empresa, dados) {
+export async function actualizarDespesa(id_despesa, id_empresa, dados) {
 
   const [check] = await connection.execute(
-    `SELECT id FROM Despesa
-     WHERE id = ? AND id_empresa = ? AND apagado = 0`,
-    [id, id_empresa]
+    `SELECT id_despesa FROM Despesa
+     WHERE id_despesa = ? AND id_empresa = ? AND apagado = 0`,
+    [id_despesa, id_empresa]
   );
 
   if (check.length === 0) {
@@ -60,7 +60,7 @@ export async function actualizarDespesa(id, id_empresa, dados) {
   const [result] = await connection.execute(
     `UPDATE Despesa
      SET data = ?, valor = ?, categoria = ?, descricao = ?
-     WHERE id = ? AND id_empresa = ?`,
+     WHERE id_despesa = ? AND id_empresa = ?`,
     [data, valor, categoria, descricao, id, id_empresa]
   );
 
@@ -69,12 +69,12 @@ export async function actualizarDespesa(id, id_empresa, dados) {
 
 
 // 🔒 Deletar despesa (soft delete)
-export async function deletarDespesa(id, id_empresa) {
+export async function deletarDespesa(id_despesa, id_empresa) {
 
   const [check] = await connection.execute(
-    `SELECT id FROM Despesa
-     WHERE id = ? AND id_empresa = ? AND apagado = 0`,
-    [id, id_empresa]
+    `SELECT id_despesa FROM Despesa
+     WHERE id_despesa = ? AND id_empresa = ? AND apagado = 0`,
+    [id_despesa, id_empresa]
   );
 
   if (check.length === 0) {
@@ -84,8 +84,8 @@ export async function deletarDespesa(id, id_empresa) {
   const [result] = await connection.execute(
     `UPDATE Despesa
      SET apagado = 1
-     WHERE id = ? AND id_empresa = ?`,
-    [id, id_empresa]
+     WHERE id_despesa = ? AND id_empresa = ?`,
+    [id_despesa, id_empresa]
   );
 
   return result.affectedRows;

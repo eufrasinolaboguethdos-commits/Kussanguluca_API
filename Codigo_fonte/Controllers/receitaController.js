@@ -48,7 +48,15 @@ export async function criar(req, res) {
 export async function listar(req, res) {
   try {
 
-    const id_empresa = req.usuario.id_empresa;
+      const buscarDespesaPorId = async (id_usuario) => {
+      const [rows] = await connection.execute(
+        'SELECT id_empresa FROM empresa WHERE id_usuario = ?',
+        [id_usuario]
+      );
+      return rows[0]?.id_empresa;
+    };
+    
+    const id_empresa = await buscarDespesaPorId(req.usuario.id);
 
     const receitas = await listarReceitas(id_empresa);
 
@@ -64,7 +72,15 @@ export async function listar(req, res) {
 export async function buscarPorId(req, res) {
   try {
 
-    const id_empresa = req.usuario.id_empresa;
+     const buscarDespesaPorId = async (id_usuario) => {
+      const [rows] = await connection.execute(
+        'SELECT id_empresa FROM empresa WHERE id_usuario = ?',
+        [id_usuario]
+      );
+      return rows[0]?.id_empresa;
+    };
+    
+    const id_empresa = await buscarDespesaPorId(req.usuario.id);
 
     const receita = await buscarReceitaPorId(req.params.id, id_empresa);
 
@@ -83,8 +99,15 @@ export async function buscarPorId(req, res) {
 export async function atualizar(req, res) {
   try {
 
-    console.log(req.usuario);
-    const id_empresa = req.usuario.id_empresa;
+      const buscarDespesaPorId = async (id_usuario) => {
+      const [rows] = await connection.execute(
+        'SELECT id_empresa FROM empresa WHERE id_usuario = ?',
+        [id_usuario]
+      );
+      return rows[0]?.id_empresa;
+    };
+    
+    const id_empresa = await buscarDespesaPorId(req.usuario.id);
 
     await actualizarReceita(
       req.params.id,
@@ -103,8 +126,15 @@ export async function atualizar(req, res) {
 // ✅ Deletar receita (soft delete)
 export async function deletar(req, res) {
   try {
-
-    const id_empresa = req.usuario.id_empresa;
+  const buscarDespesaPorId = async (id_usuario) => {
+      const [rows] = await connection.execute(
+        'SELECT id_empresa FROM empresa WHERE id_usuario = ?',
+        [id_usuario]
+      );
+      return rows[0]?.id_empresa;
+    };
+    
+    const id_empresa = await buscarDespesaPorId(req.usuario.id);
 
     await deletarReceita(req.params.id, id_empresa);
 

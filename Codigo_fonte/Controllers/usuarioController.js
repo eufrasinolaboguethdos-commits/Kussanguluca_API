@@ -24,7 +24,7 @@ export async function loginUsuario(req, res) {
     if (!senhaValida) return res.status(401).json({ error: 'Senha inválida' });
 
 
-    const token = jwt.sign({ id: usuario.id_usuario, id_empresa: usuario.id_empresa, }, process.env.JWT_SECRET, { expiresIn: '360s' });
+    const token = jwt.sign({ id: usuario.id_usuario, id_empresa: usuario.id_empresa, }, process.env.JWT_SECRET, { expiresIn: '3600s' });
     res.json({ token });
   } catch (err) {
     res.status(500).json({ error: err.message });

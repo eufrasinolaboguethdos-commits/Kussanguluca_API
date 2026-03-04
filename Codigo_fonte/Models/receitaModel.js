@@ -40,13 +40,13 @@ export async function buscarReceitaPorId(id, id_empresa) {
 
 
 // 🔒 Atualizar receita (com verificação de segurança)
-export async function actualizarReceita(id, id_empresa, dados) {
+export async function actualizarReceita(id_receita, id_empresa, dados) {
 
   // verificar se a receita pertence à empresa
   const [check] = await connection.execute(
-    `SELECT id FROM Receita 
-     WHERE id = ? AND id_empresa = ? AND apagado = 0`,
-    [id, id_empresa]
+    `SELECT id_receita FROM Receita 
+     WHERE id_receita = ? AND id_empresa = ? AND apagado = 0`,
+    [id_receita, id_empresa]
   );
 
   if (check.length === 0) {
@@ -58,8 +58,8 @@ export async function actualizarReceita(id, id_empresa, dados) {
   const [result] = await connection.execute(
     `UPDATE Receita
      SET data = ?, valor = ?, categoria = ?, descricao = ?
-     WHERE id = ? AND id_empresa = ?`,
-    [data, valor, categoria, descricao, id, id_empresa]
+     WHERE id_receita = ? AND id_empresa = ?`,
+    [data, valor, categoria, descricao, id_receita, id_empresa]
   );
 
   return result.affectedRows;
@@ -67,13 +67,13 @@ export async function actualizarReceita(id, id_empresa, dados) {
 
 
 // 🔒 Delete seguro (Soft Delete)
-export async function deletarReceita(id, id_empresa) {
+export async function deletarReceita(id_receita, id_empresa) {
 
   // verificar se pertence à empresa
   const [check] = await connection.execute(
-    `SELECT id FROM Receita
-     WHERE id = ? AND id_empresa = ? AND apagado = 0`,
-    [id, id_empresa]
+    `SELECT id_receita FROM Receita
+     WHERE id_receita = ? AND id_empresa = ? AND apagado = 0`,
+    [id_receita, id_empresa]
   );
 
   if (check.length === 0) {
@@ -83,8 +83,8 @@ export async function deletarReceita(id, id_empresa) {
   const [result] = await connection.execute(
     `UPDATE Receita
      SET apagado = 1
-     WHERE id = ? AND id_empresa = ?`,
-    [id, id_empresa]
+     WHERE id_receita = ? AND id_empresa = ?`,
+    [id_receita, id_empresa]
   );
 
   return result.affectedRows;
