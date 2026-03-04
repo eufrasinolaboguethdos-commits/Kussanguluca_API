@@ -7,7 +7,7 @@ import { criarEmpresa, listarEmpresas, buscarEmpresaPorId,updateEmpresa,apagarEm
 // CREATE
 export async function adicionarEmpresa(req, res) {
   try {
-    const id_usuario = req.usuarioId; // 👈 vem do middleware
+    const id_usuario = req.usuario.id; // 👈 vem do middleware
     const { nome, NIF, setor } = req.body;
 
     if (!nome || !NIF || !setor) {
