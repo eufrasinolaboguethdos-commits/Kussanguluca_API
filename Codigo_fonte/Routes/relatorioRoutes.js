@@ -7,3 +7,4 @@ const router = express.Router();
 router.get("/", authMiddleware, relatorio);
 
 export default router;
+
