@@ -5,10 +5,6 @@ import { connection } from "../Config/db.js";
 
 export async function relatorio(req, res) {
   try {
-
-
-
-
      // buscar id da empresa pelo id do usuario
         const buscarIdEmpresaPeloIdUsuario = async (id_usuario) => {
           const [rows] = await connection.execute(

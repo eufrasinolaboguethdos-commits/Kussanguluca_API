@@ -11,8 +11,6 @@ import { connection } from '../Config/db.js';
 // ✅ Criar receita
 export async function criar(req, res) {
   try {
-    
-    
      // buscar id da empresa pelo id do usuario
     const buscarIdEmpresaPeloIdUsuario = async (id_usuario) => {
       const [rows] = await connection.execute(
