@@ -15,26 +15,29 @@ export async function criarReceita({  data, valor, categoria, descricao, id_empr
 
 
 // ✅ Listar todas receitas da empresa
-export async function listarReceitas(id_empresa) {
-  const [rows] = await connection.execute(
-    `SELECT * FROM Receita 
-     WHERE id_empresa = ? AND apagado = 0
-     ORDER BY data DESC`,
-    [id_empresa || null]
-  );
 
+export const listarReceitas = async (id_empresa) => {
+  const sql = `
+    SELECT * 
+    FROM Receita 
+    WHERE id_empresa = ? AND apagado = 0
+    ORDER BY data DESC
+  `;
+  const id = Number(id_empresa); // reforço
+  const [rows] = await connection.execute(sql, [id]);
   return rows;
-}
+};
+
+// Se houver outra "const criarReceita" abaixo, apague-a!
 
 
 // ✅ Buscar uma receita específica
-export async function buscarReceitaPorId(id, id_empresa) {
+export async function buscarReceitaPorId(id_receita, id_empresa) {
   const [rows] = await connection.execute(
     `SELECT * FROM Receita 
-     WHERE id = ? AND id_empresa = ? AND apagado = 0`,
-    [id, id_empresa]
+     WHERE id_receita = ? AND id_empresa = ? AND apagado = 0`,
+    [id_receita, id_empresa]
   );
-
   return rows[0];
 }
 

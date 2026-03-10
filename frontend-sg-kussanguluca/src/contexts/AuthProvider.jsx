@@ -1,119 +1,146 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import authService from '../services/authService'; // <-- IMPORTAR ASSIM
-import AuthContext from './AuthContext';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import authService from "../services/authService";
+import AuthContext from "./AuthContext";
+import api from "../services/api";
 
 export const AuthProvider = ({ children }) => {
-  // Usar nomes diferentes para evitar qualquer conflito
-  const [userState, setUserState] = useState(null);
-  const [activeCompanyState, setActiveCompanyState] = useState(null);
+
+  const [user, setUser] = useState(null);
+  const [activeCompany, setActiveCompanyState] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = () => {
-      const token = localStorage.getItem('token');
-      const savedUser = localStorage.getItem('user');
-      const savedCompany = localStorage.getItem('activeCompany');
-      
-      if (token && savedUser) {
-        try {
-          const parsedUser = JSON.parse(savedUser);
-          setUserState(parsedUser);
-          
-          if (savedCompany) {
-            const parsedCompany = JSON.parse(savedCompany);
-            setActiveCompanyState(parsedCompany);
-            axios.defaults.headers.common['X-Company-ID'] = parsedCompany.id_empresa;
-          }
-        } catch (error) {
-          console.error('Erro ao restaurar sessão:', error);
-          // Limpar dados inválidos
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('activeCompany');
-        }
-      }
-      setLoading(false);
-    };
+  const initAuth = () => {
+    const token = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+    const savedCompany = localStorage.getItem("activeCompany");
+    const clearStorage = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+};
 
+
+    if (!token || !savedUser) {
+      clearStorage();
+      setLoading(false);
+      return;
+    }
+
+    try {
+
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      if (savedCompany) {
+
+        const parsedCompany = JSON.parse(savedCompany);
+
+        if (parsedCompany && parsedCompany.id_empresa) {
+          setActiveCompanyState(parsedCompany);
+          axios.defaults.headers.common["X-Company-ID"] = parsedCompany.id_empresa;
+        } else {
+          localStorage.removeItem("activeCompany");
+        }
+
+      }
+
+    } catch (error) {
+
+      console.error("Erro ao restaurar sessão:", error);
+      clearStorage();
+
+    } finally {
+      setLoading(false);
+    } 
+  };
     initAuth();
+
   }, []);
 
-  // Função de login
-  const signIn = async (email, senha) => {
+  const signIn = async ({ email, senha }) => {
+
     try {
+
       const response = await authService.login({ email, senha });
-      
-      // Guardar dados
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      // Atualizar headers do axios
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
-      
-      // Atualizar estado
-      setUserState(response.user);
-      
-      // Se vier empresas, guardar
+
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+
+      axios.defaults.headers.common["Authorization"] = `Bearer ${response.token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${response.token}`;
+
+      setUser(response.user);
+
       if (response.empresas) {
-        localStorage.setItem('userCompanies', JSON.stringify(response.empresas));
+        localStorage.setItem("userCompanies", JSON.stringify(response.empresas));
       }
-      
+
       return response;
+
     } catch (error) {
-      console.error('Erro no login:', error);
+
+      console.error("Erro no login:", error);
       throw error;
+
     }
+
   };
 
-  // Função para definir empresa ativa
   const setActiveCompany = (company) => {
-    if (company) {
-      setActiveCompanyState(company);
-      localStorage.setItem('activeCompany', JSON.stringify(company));
-      axios.defaults.headers.common['X-Company-ID'] = company.id_empresa;
-    } else {
+
+    if (!company || !company.id_empresa) {
+
       setActiveCompanyState(null);
-      localStorage.removeItem('activeCompany');
-      delete axios.defaults.headers.common['X-Company-ID'];
+      localStorage.removeItem("activeCompany");
+      delete axios.defaults.headers.common["X-Company-ID"];
+      return;
+
     }
+
+    setActiveCompanyState(company);
+
+    localStorage.setItem("activeCompany", JSON.stringify(company));
+
+    axios.defaults.headers.common["X-Company-ID"] = company.id_empresa;
+
   };
 
-  // Função de logout
+  const clearStorage = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("activeCompany");
+    localStorage.removeItem("userCompanies");
+    localStorage.removeItem("activeCompanyId"); // ✅ limpa o do useCompanyId também
+    delete axios.defaults.headers.common["Authorization"];
+    delete axios.defaults.headers.common["X-Company-ID"];
+};
+
   const logout = () => {
-    // Limpar localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('activeCompany');
-    localStorage.removeItem('userCompanies');
-    localStorage.removeItem('activeCompanyId');
-    
-    // Limpar estados
-    setUserState(null);
+
+    clearStorage();
+
+    setUser(null);
     setActiveCompanyState(null);
-    
-    // Limpar headers do axios
-    delete axios.defaults.headers.common['Authorization'];
-    delete axios.defaults.headers.common['X-Company-ID'];
+
   };
 
-  // Valor do contexto - expor userState como "user"
   const value = {
-    user: userState,              // <-- expõe como "user"
-    setUser: setUserState,        // <-- expõe a função também se precisares
-    activeCompany: activeCompanyState,
-    setActiveCompany,
-    signIn,
-    logout,
-    loading,
-    isAuthenticated: !!userState
-  };
+    user, setUser, activeCompany, setActiveCompany,
+    signIn, logout, signOut: logout, // ✅ alias para o Navbar funcionar
+    loading, isAuthenticated: !!user
+};
 
   return (
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
+
 };
 
 export default AuthProvider;

@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { empresaService } from '../services/empresaService';
 import { useAuth } from '../hooks/useAuth';
+import { useCompanyId } from '../hooks/useCompanyId';
 import Button from '../components/ui/Button';
-import { 
-  FiBriefcase, FiPlus, FiChevronRight, FiCheckCircle 
-} from 'react-icons/fi';
+import { FiBriefcase, FiPlus, FiChevronRight, FiCheckCircle } from 'react-icons/fi';
 
 const CompanySelector = () => {
   const [empresas, setEmpresas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEmpresa, setSelectedEmpresa] = useState(null);
-  const { user, setActiveCompany } = useAuth();
+  const { user } = useAuth();
+  // ✅ usa selectCompany do hook centralizado
+  const { selectCompany } = useCompanyId();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,12 +22,11 @@ const CompanySelector = () => {
   const carregarEmpresas = async () => {
     try {
       setLoading(true);
-      // Buscar empresas do utilizador logado
       const dados = await empresaService.getByUser();
-      setEmpresas(dados);
-      
+      setEmpresas(dados || []);
+
       // Se só tiver uma empresa, seleciona automaticamente
-      if (dados.length === 1) {
+      if (dados?.length === 1) {
         handleSelectCompany(dados[0]);
       }
     } catch (error) {
@@ -38,19 +38,16 @@ const CompanySelector = () => {
 
   const handleSelectCompany = (empresa) => {
     setSelectedEmpresa(empresa);
-    setActiveCompany(empresa); // Guarda no contexto/auth
-    
-    // Guarda no localStorage para persistir
-    localStorage.setItem('activeCompanyId', empresa.id_empresa);
-    
-    // Redireciona para dashboard
+    // ✅ grava no localStorage E atualiza o hook de uma vez
+    selectCompany(empresa);
+
     setTimeout(() => {
       navigate('/dashboard');
     }, 500);
   };
 
   const handleCreateCompany = () => {
-    navigate('/empresa/nova');
+    navigate('/empresa');
   };
 
   if (loading) {
@@ -94,7 +91,7 @@ const CompanySelector = () => {
             <h3 className="text-lg font-semibold text-gray-700 mb-4">
               Suas Empresas ({empresas.length})
             </h3>
-            
+
             {empresas.map((empresa) => (
               <div
                 key={empresa.id_empresa}
@@ -116,12 +113,12 @@ const CompanySelector = () => {
                     </p>
                   </div>
                 </div>
-                
-                {selectedEmpresa?.id_empresa === empresa.id_empresa && (
+
+                {selectedEmpresa?.id_empresa === empresa.id_empresa ? (
                   <FiCheckCircle className="text-brand-500" size={24} />
+                ) : (
+                  <FiChevronRight className="text-gray-400" size={20} />
                 )}
-                
-                <FiChevronRight className="text-gray-400" size={20} />
               </div>
             ))}
 

@@ -16,8 +16,12 @@ import Receitas from '../pages/Receitas';
 import Despesas from '../pages/Despesas';
 import Relatorio from '../pages/Relatorio';
 import Empresa from '../pages/Empresa'; // Cria se quiseres
+import CompanySelector from '../pages/CompanySelector';
 import Termos from '../pages/Termos';
 import Privacidade from '../pages/Privacidade';
+import ForgotPassword from '../pages/ForgotPassword';
+
+
 
 
 
@@ -32,6 +36,7 @@ export const router = createBrowserRouter([
     children: [
       { path: 'login', element: <Login /> },
       { path: 'register', element: <Register /> },
+      { path: 'forgot-password', element: <ForgotPassword /> },
       { path: '/', element: <Navigate to="/login" replace /> },
       { path:"/termos", element: <Termos />},
       { path:"/privacidade", element: <Privacidade />},
@@ -49,6 +54,7 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
            // Aqui definimos as páginas internas
+          { path: 'company-selector', element: <CompanySelector /> },
           { path: 'dashboard', element: <Dashboard /> },
           { path: 'receitas', element: <Receitas /> },
           { path: 'despesas', element: <Despesas /> },

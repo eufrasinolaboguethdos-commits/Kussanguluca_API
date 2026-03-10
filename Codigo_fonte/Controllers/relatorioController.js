@@ -19,7 +19,7 @@ export async function relatorio(req, res) {
         console.log("body:", req.body);
         //const { data, valor, categoria, descricao } = req.body;
     
-        const id_empresa =  await buscarIdEmpresaPeloIdUsuario(req.usuario.id); 
+        const id_empresa = req.query.id_empresa || await buscarIdEmpresaPeloIdUsuario(req.usuario.id); // ✅ usa o da query primeiro, se nao vier, usa o do usuario logado
 
 
     const receitas = await listarReceitas(id_empresa);

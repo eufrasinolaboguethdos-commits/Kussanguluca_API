@@ -36,7 +36,7 @@ export async function adicionarEmpresa(req, res) {
 // READ - listar empresas
 export async function obterEmpresas(req, res) {
   try {
-    const id_usuario = req.usuarioId;
+    const id_usuario = req.usuario?.id;
 
     const empresas = await listarEmpresas(id_usuario);
 

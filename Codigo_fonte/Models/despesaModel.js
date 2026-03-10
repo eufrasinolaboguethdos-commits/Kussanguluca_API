@@ -61,7 +61,7 @@ export async function actualizarDespesa(id_despesa, id_empresa, dados) {
     `UPDATE Despesa
      SET data = ?, valor = ?, categoria = ?, descricao = ?
      WHERE id_despesa = ? AND id_empresa = ?`,
-    [data, valor, categoria, descricao, id, id_empresa]
+    [data, valor, categoria, descricao, id_despesa, id_empresa]
   );
 
   return result.affectedRows;

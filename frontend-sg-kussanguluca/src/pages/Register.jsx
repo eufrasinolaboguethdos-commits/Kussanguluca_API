@@ -26,7 +26,7 @@ const Register = () => {
       await authService.register({
         nome: userData.nome,
         email: userData.email,
-        password: userData.password
+        senha: userData.password
       });
       
       setRegisterSuccess(true);

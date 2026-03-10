@@ -32,15 +32,15 @@ const Relatorio = () => {
   const dataFim = watch('dataFim');
 
   // Buscar relatório da API
-  const gerarRelatorio = async (filtros) => {
+ const gerarRelatorio = async (filtros) => {
     try {
       setLoading(true);
-      
-      // Chamar o endpoint do teu backend
+      const id_empresa = localStorage.getItem('activeCompanyId'); // ✅ pega do localStorage
       const response = await api.get('/relatorio', {
         params: {
           dataInicio: filtros.dataInicio,
-          dataFim: filtros.dataFim
+          dataFim: filtros.dataFim,
+          id_empresa  // ✅ envia na query
         }
       });
       

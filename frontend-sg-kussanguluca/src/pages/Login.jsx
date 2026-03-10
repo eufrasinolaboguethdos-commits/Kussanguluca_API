@@ -11,26 +11,34 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
   const { signIn } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigate();;
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
-    setLoginError('');
-    
-    try {
-      await signIn(data);
-      //console.log("LOGIN RESPONSE:", response);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Erro no login:', error);
-      setLoginError(
-        error.response?.data?.message || 
-        'Email ou senha incorretos. Tente novamente.'
-      );
-    } finally {
-      setIsLoading(false);
+  setIsLoading(true);
+ 
+
+  try {
+    // Tenta fazer o login
+    await signIn(data);//(data.email, data.senha); 
+    setTimeout(() => {
+      navigate('/company-selector', { replace: true });
+    }, 100); // Redireciona para o company-selector após sucesso
+  
+  } catch (error) {
+    console.error('Erro no login:', error);
+
+    // Garantir que estamos acessando o erro de maneira segura
+    if (error.response && error.response.data && error.response.data.message) {
+      // Caso o erro tenha a estrutura esperada (resposta do backend com message)
+      setLoginError(error.response.data.message);
+    } else {
+      // Caso o erro seja genérico ou de outra natureza (sem message)
+      setLoginError('Email ou senha incorretos. Tente novamente.');
     }
-  };
+  } finally {
+    setIsLoading(false); // Desativa o loading
+  }
+};
 
   return (
     <div className="w-full">
@@ -52,6 +60,7 @@ const Login = () => {
           type="email"
           placeholder="exemplo@email.com"
           error={errors.email}
+          onFocus={() => setLoginError('')}
           {...register('email', {
             required: 'O email é obrigatório',
             pattern: {
@@ -66,6 +75,7 @@ const Login = () => {
           type="password"
           placeholder="********"
           error={errors.senha}
+          onFocus={() => setLoginError('')}
           {...register('senha', {
             required: 'A palavra-passe é obrigatória',
             minLength: { value: 6, message: 'Mínimo de 6 caracteres' }
@@ -77,9 +87,10 @@ const Login = () => {
              <input type="checkbox" className="mr-2 rounded text-brand-500 focus:ring-brand-500" />
              Lembrar-me
           </label>
-          <a href="#" className="font-medium text-brand-500 hover:text-brand-700">
-            Esqueceu a senha?
-          </a>
+          
+          <Link to="/forgot-password" className="font-medium text-brand-500 hover:text-brand-700">
+             Esqueceu a senha?
+          </Link>
         </div>
 
         <Button type="submit" isLoading={isLoading}>

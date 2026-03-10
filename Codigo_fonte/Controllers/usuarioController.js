@@ -15,30 +15,46 @@ export async function registrarUsuario(req, res) {
 }
 
 export async function loginUsuario(req, res) {
+   console.log("BODY:", req.body);
   try {
     const { email, senha } = req.body;
+
+    // Verificar se os dados estão sendo recebidos corretamente
+    console.log('Email recebido:', email);
+    console.log('Senha recebida:', senha);
+
+    // Buscar o usuário pelo email
     const usuario = await buscarUsuarioPorEmail(email);
+    console.log("USER:", usuario);
 
-    if (!usuario) return res.status(401).json({ error: 'Usuário não encontrado' });
+    // Verificar se o usuário foi encontrado
+    if (!usuario) {
+      console.log('Usuário não encontrado:', email);
+      return res.status(401).json({ error: 'Usuário não encontrado' });
+    }
 
+    // Verificar a senha comparando com o hash no banco
     const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    if (!senhaValida) return res.status(401).json({ error: 'Senha inválida' });
+    if (!senhaValida) {
+      console.log('Senha inválida para o usuário:', email);
+      return res.status(401).json({ error: 'Senha inválida' });
+    }
 
-    // Função interna para buscar a empresa
-    const buscarIdEmpresaPeloIdUsuario = async (id) => {
+    // Verificar se o usuário possui empresa cadastrada
+    const buscarIdEmpresaPeloIdUsuario = async (id_usuario) => {
       const [rows] = await connection.execute(
         'SELECT id_empresa FROM empresa WHERE id_usuario = ?',
-        [id]
+        [id_usuario]
       );
       return rows[0]?.id_empresa;
     };
 
-    // CORREÇÃO AQUI: Use "usuario.id_usuario" em vez de "req.usuario.id_Usuario"
+    // Se tudo estiver correto, gerar o token
     const idEmpresa = await buscarIdEmpresaPeloIdUsuario(usuario.id_usuario);
 
     const token = jwt.sign(
-      { id: usuario.id_usuario, id_empresa: idEmpresa || null }, 
-      process.env.JWT_SECRET, 
+      { id: usuario.id_usuario, id_empresa: idEmpresa || null },
+      process.env.JWT_SECRET,
       { expiresIn: '3600s' }
     );
 
@@ -51,9 +67,12 @@ export async function loginUsuario(req, res) {
         id_empresa: idEmpresa
       }
     });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Erro no login:", err);
+    return res.status(500).json({ message: "Erro no servidor" });
   }
+
 }
 export async function obterUsuarios(req, res) {
   try {
@@ -106,6 +125,31 @@ export async function apagar_Usuario(req, res) {
 
     res.json({ message: "Usuário deletado" });
 
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function resetSenha(req, res) {
+  try {
+    const { email, novaSenha } = req.body;
+
+    // verificar se o utilizador existe
+    const usuario = await buscarUsuarioPorEmail(email);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Email não encontrado' });
+    }
+
+    // hash da nova senha
+    const senhaHash = await bcrypt.hash(novaSenha, 10);
+
+    // atualizar no banco
+    await connection.execute(
+      'UPDATE usuario SET senha = ? WHERE email = ?',
+      [senhaHash, email]
+    );
+
+    res.json({ message: 'Senha redefinida com sucesso' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

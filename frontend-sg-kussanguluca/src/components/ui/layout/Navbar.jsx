@@ -1,9 +1,16 @@
 import React from 'react';
 import { useAuth } from "../../../hooks/useAuth";
 import { FiLogOut, FiUser } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    signOut();
+    navigate('/login'); // ✅ redireciona após logout
+  };
 
   return (
     <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6 fixed top-0 right-0 left-0 lg:left-64 z-10 transition-all duration-300">
@@ -19,7 +26,7 @@ const Navbar = () => {
              <span className="font-medium hidden md:block">{user?.nome || 'Utilizador'}</span>
            </div>
            <button 
-             onClick={signOut} 
+             onClick={handleLogout} 
              className="text-gray-500 hover:text-red-600 transition duration-200 p-2"
              title="Sair"
            >

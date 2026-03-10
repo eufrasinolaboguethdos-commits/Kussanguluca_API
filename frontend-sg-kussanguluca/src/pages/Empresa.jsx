@@ -45,7 +45,7 @@ const Empresas = () => {
     reset({
       nome: '',
       NIF: '',
-      setor: 'Tecnologia',
+      setor: '',
       email: '',
       telefone: '',
       endereco: '',
@@ -60,11 +60,15 @@ const Empresas = () => {
     reset(empresa);
   };
 
-  const handleSelecionar = (empresa) => {
-    setActiveCompany(empresa);
-    setMensagem(`Empresa "${empresa.nome}" selecionada!`);
-    setTimeout(() => setMensagem(''), 2000);
-  };
+  // Substitui apenas esta função dentro do Empresas.jsx:
+
+const handleSelecionar = (empresa) => {
+  // ✅ persiste no localStorage para o useCompanyId pegar
+  localStorage.setItem('activeCompanyId', String(empresa.id_empresa));
+  setActiveCompany(empresa); // mantém para UI da própria página
+  setMensagem(`Empresa "${empresa.nome}" selecionada!`);
+  setTimeout(() => setMensagem(''), 2000);
+};
 
   const onSubmit = async (data) => {
     try {
@@ -123,7 +127,7 @@ const Empresas = () => {
 
   const voltar = () => {
     if (modo === 'lista') {
-      navigate('/dashboard');
+      navigate('/empresa');
     } else {
       setModo('lista');
     }

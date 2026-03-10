@@ -27,8 +27,10 @@ export async function criar(req, res) {
     console.log("body:", req.body);
     const { data, valor, categoria, descricao } = req.body;
 
-    const id_empresa = await buscarIdEmpresaPeloIdUsuario(req.usuario.id);
-
+    const id_empresa = req.body.id_empresa 
+  ? Number(req.body.id_empresa) 
+  : await buscarIdEmpresaPeloIdUsuario(req.usuario.id);
+  
     const id = await criarDespesa({
       id_empresa,
       data,
@@ -48,19 +50,21 @@ export async function criar(req, res) {
 // ✅ Listar despesas
 export async function listar(req, res) {
   try {
+    let id_empresa = req.query.id_empresa ? Number(req.query.id_empresa) : null;
 
-     const buscarDespesaPorId = async (id_usuario) => {
+    if (!id_empresa) {
       const [rows] = await connection.execute(
         'SELECT id_empresa FROM empresa WHERE id_usuario = ?',
-        [id_usuario]
+        [req.usuario?.id]
       );
-      return rows[0]?.id_empresa;
-    };
-    
-    const id_empresa = await buscarDespesaPorId(req.usuario.id);
+      id_empresa = rows[0]?.id_empresa ? Number(rows[0].id_empresa) : null;
+    }
+
+    if (!id_empresa) {
+      return res.status(400).json({ error: 'id_empresa obrigatório' });
+    }
 
     const despesas = await listarDespesas(id_empresa);
-
     res.json(despesas);
 
   } catch (err) {

@@ -1,10 +1,11 @@
-import api from './api';
+import { api } from './api';
 
-const empresaService = {
+export const empresaService = {
   // Buscar empresas do utilizador logado
   getByUser: async () => {
     try {
-      const response = await api.get('/empresas/user');
+      //const userId = localStorage.getItem('userId');
+      const response = await api.get(`/empresas`);
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar empresas do utilizador:', error);

@@ -6,12 +6,15 @@ import {
   FiChevronLeft, FiChevronRight, FiAlertTriangle
 } from 'react-icons/fi';
 import { despesaService } from '../services/despesaService';
+import { useCompanyId } from '../hooks/useCompanyId'; // ✅ trocado
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 const Despesas = () => {
+  const { companyId, loadingCompany } = useCompanyId(); // ✅ trocado
+  
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
@@ -27,24 +30,36 @@ const Despesas = () => {
   
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
+  // ✅ igual às Receitas
+  const canCreate = !!companyId;
+
   const carregarDespesas = useCallback(async () => {
+    if (!companyId) {
+      setDespesas([]);
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
-      const dados = await despesaService.getAll();
-      setDespesas(dados || []);
+      const dados = await despesaService.getAll(companyId); // ✅ passa companyId
+      setDespesas(Array.isArray(dados) ? dados : []);
     } catch (error) {
       console.error('Erro ao carregar despesas:', error);
-      alert('Erro ao carregar despesas. Verifique a conexão com o servidor.');
+      setDespesas([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [companyId]);
 
+  // ✅ aguarda hidratação do hook
   useEffect(() => {
-    carregarDespesas();
-  }, [carregarDespesas]);
+    if (!loadingCompany) carregarDespesas();
+  }, [loadingCompany, carregarDespesas]);
 
   const abrirModal = (despesa = null) => {
+    if (!canCreate) return; // ✅ bloqueia se não houver empresa
+
     if (despesa) {
       setDespesaEditando(despesa);
       reset({
@@ -72,10 +87,13 @@ const Despesas = () => {
   };
 
   const onSubmit = async (data) => {
+    if (!companyId) return; // ✅ guard
+
     try {
       const payload = {
         ...data,
-        valor: parseFloat(data.valor)
+        valor: parseFloat(data.valor),
+        id_empresa: companyId // ✅ usa companyId
       };
 
       if (despesaEditando) {
@@ -93,6 +111,8 @@ const Despesas = () => {
   };
 
   const handleExcluir = async (id) => {
+    if (!canCreate) return; // ✅ guard
+
     if (window.confirm('Tem certeza que deseja excluir esta despesa?')) {
       try {
         await despesaService.delete(id);
@@ -105,13 +125,14 @@ const Despesas = () => {
   };
 
   const exportarCSV = () => {
+    if (!canCreate) return;
     const headers = ['Data', 'Descrição', 'Categoria', 'Valor'];
     const csvContent = [
       headers.join(';'),
       ...despesasFiltradas.map(d => 
         [formatarData(d.data), d.descricao, d.categoria, d.valor].join(';')
       )
-    ].join('\\n');
+    ].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -141,29 +162,22 @@ const Despesas = () => {
       const matchTexto = !filtroTexto || 
         despesa.descricao?.toLowerCase().includes(filtroTexto.toLowerCase()) ||
         despesa.categoria?.toLowerCase().includes(filtroTexto.toLowerCase());
-      
       const matchCategoria = !filtroCategoria || despesa.categoria === filtroCategoria;
-      
       const dataDespesa = new Date(despesa.data);
       const matchDataInicio = !filtroDataInicio || dataDespesa >= new Date(filtroDataInicio);
       const matchDataFim = !filtroDataFim || dataDespesa <= new Date(filtroDataFim);
-      
       return matchTexto && matchCategoria && matchDataInicio && matchDataFim;
     })
     .sort((a, b) => {
       let valorA = a[ordenacao.campo];
       let valorB = b[ordenacao.campo];
-      
       if (ordenacao.campo === 'data') {
         valorA = new Date(valorA);
         valorB = new Date(valorB);
       }
-      
-      if (ordenacao.direcao === 'asc') {
-        return valorA > valorB ? 1 : -1;
-      } else {
-        return valorA < valorB ? 1 : -1;
-      }
+      return ordenacao.direcao === 'asc'
+        ? valorA > valorB ? 1 : -1
+        : valorA < valorB ? 1 : -1;
     });
 
   const totalPaginas = Math.ceil(despesasFiltradas.length / itensPorPagina);
@@ -175,13 +189,23 @@ const Despesas = () => {
   const totalDespesas = despesas.reduce((sum, d) => sum + parseFloat(d.valor || 0), 0);
   const totalFiltrado = despesasFiltradas.reduce((sum, d) => sum + parseFloat(d.valor || 0), 0);
   const categorias = [...new Set(despesas.map(d => d.categoria).filter(Boolean))];
-
-  // Calcular média mensal
   const mesesUnicos = new Set(despesas.map(d => {
     const data = new Date(d.data);
     return `${data.getFullYear()}-${data.getMonth()}`;
   })).size;
   const mediaMensal = mesesUnicos > 0 ? totalDespesas / mesesUnicos : 0;
+
+  // ✅ Guard de hidratação (igual às Receitas)
+  if (loadingCompany) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">A preparar o ambiente da empresa...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -196,7 +220,6 @@ const Despesas = () => {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* Header com estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-6 text-white shadow-lg md:col-span-2">
           <div className="flex items-center justify-between">
@@ -235,7 +258,6 @@ const Despesas = () => {
         </div>
       </div>
 
-      {/* Barra de ações */}
       <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
@@ -249,7 +271,6 @@ const Despesas = () => {
                 className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent w-full sm:w-80"
               />
             </div>
-            
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
@@ -264,14 +285,24 @@ const Despesas = () => {
           <div className="flex gap-3 w-full lg:w-auto">
             <button
               onClick={exportarCSV}
-              className="flex items-center gap-2 px-4 py-2.5 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={!canCreate}
+              className={`flex items-center gap-2 px-4 py-2.5 border rounded-lg transition-colors ${
+                !canCreate
+                  ? 'text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed'
+                  : 'text-gray-600 border-gray-200 hover:bg-gray-50'
+              }`}
             >
               <FiDownload size={18} />
               Exportar
             </button>
             <Button 
-              onClick={() => abrirModal()} 
-              className="flex items-center gap-2 bg-red-500 hover:bg-red-600"
+              onClick={() => abrirModal()}
+              disabled={!canCreate}
+              className={`flex items-center gap-2 ${
+                !canCreate
+                  ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+              }`}
             >
               <FiPlus size={20} />
               Nova Despesa
@@ -279,7 +310,6 @@ const Despesas = () => {
           </div>
         </div>
 
-        {/* Filtros avançados */}
         {showFilters && (
           <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in-up">
             <div>
@@ -317,7 +347,6 @@ const Despesas = () => {
         )}
       </div>
 
-      {/* Alerta de gastos elevados */}
       {totalDespesas > 100000 && (
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3">
           <FiAlertTriangle className="text-orange-500" size={24} />
@@ -328,7 +357,6 @@ const Despesas = () => {
         </div>
       )}
 
-      {/* Tabela */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -403,6 +431,7 @@ const Despesas = () => {
                       <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => abrirModal(despesa)}
+                          disabled={!canCreate}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Editar"
                         >
@@ -410,6 +439,7 @@ const Despesas = () => {
                         </button>
                         <button
                           onClick={() => handleExcluir(despesa.id_despesa || despesa.id)}
+                          disabled={!canCreate}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Excluir"
                         >
@@ -424,7 +454,6 @@ const Despesas = () => {
           </table>
         </div>
 
-        {/* Paginação */}
         {totalPaginas > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
             <p className="text-sm text-gray-600">
@@ -453,7 +482,6 @@ const Despesas = () => {
         )}
       </div>
 
-      {/* Modal */}
       {modalAberto && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-fade-in-up">
@@ -500,7 +528,6 @@ const Despesas = () => {
                     valueAsNumber: true
                   })}
                 />
-                
                 <Input
                   label="Data *"
                   type="date"

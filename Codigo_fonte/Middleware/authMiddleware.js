@@ -1,23 +1,26 @@
 import jwt from "jsonwebtoken";
 
-export async function authMiddleware(req, res, next) {
-  try {
-    const authHeader = req.headers.authorization;
+export const authMiddleware = (req, res, next) => {
+    const authHeader = req.headers.authorization;  // Ex: "Bearer xyz..."
 
     if (!authHeader) {
-      return res.status(401).json({ error: "Token não fornecido" });
+        return res.status(401).json({ error: "Token não fornecido" });
     }
 
-    const token = authHeader.split(' ')[1];
+    const [, token] = authHeader.split(" ");
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 🔥 ESSA LINHA É FUNDAMENTAL
-    req.usuario = decoded;
+        // 👇 AQUI ESTAVA O PROBLEMA: NÃO SETAVA req.usuario
+        req.usuario = {
+            id: decoded.id,     // deve ser exatamente o campo do payload do teu token
+            email: decoded.email
+        };
 
-    next();
+        next();
 
-  } catch (err) {
-    return res.status(401).json({ error: "Token inválido" });
-  }
-}
+    } catch (error) {
+        return res.status(401).json({ error: "Token inválido" });
+    }
+};

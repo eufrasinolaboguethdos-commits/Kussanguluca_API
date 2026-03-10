@@ -1,8 +1,9 @@
 import { api } from './api';
 
 export const despesaService = {
-  getAll: async () => {
-    const response = await api.get('/despesas');
+  // ✅ agora filtra por empresa
+  getAll: async (id_empresa) => {
+    const response = await api.get(`/despesas?id_empresa=${id_empresa}`);
     return response.data;
   },
 
@@ -11,12 +12,14 @@ export const despesaService = {
     return response.data;
   },
 
+  // ✅ envia id_empresa no payload
   create: async (data) => {
     const payload = {
       descricao: data.descricao,
       valor: parseFloat(data.valor),
       data: data.data,
       categoria: data.categoria,
+      id_empresa: data.id_empresa,
     };
     const response = await api.post('/despesas', payload);
     return response.data;

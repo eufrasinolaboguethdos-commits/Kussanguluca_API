@@ -11,7 +11,7 @@ export const authService = {
       
       const response = await api.post('/usuarios/login', {
         email: credentials.email,
-        senha: credentials.password // ou 'password' conforme o teu backend
+        senha: credentials.senha // ou 'password' conforme o teu backend
       });
       
       console.log('✅ Login bem-sucedido:', response.data);
@@ -34,7 +34,7 @@ export const authService = {
       const response = await api.post('/usuarios', {
         nome: userData.nome,
         email: userData.email,
-        senha: userData.password,
+        senha: userData.senha,
         // Adiciona outros campos conforme o teu backend
       });
       

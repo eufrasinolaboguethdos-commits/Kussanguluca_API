@@ -14,7 +14,7 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Pegar token do localStorage
-    const token = localStorage.getItem('sg_token');
+    const token = localStorage.getItem('token');
     
     // Se existe token, adicionar ao header
     if (token) {
@@ -41,11 +41,15 @@ api.interceptors.response.use(
     
     // Se erro 401 (não autorizado), fazer logout
     if (error.response?.status === 401) {
-      console.log('🚫 Token inválido ou expirado. Fazendo logout...');
-      localStorage.removeItem('sg_token');
-      localStorage.removeItem('sg_user');
-      window.location.href = '/login';
-    }
+  // Só faz logout se NÃO for a rota de login
+  const isLoginRequest = error.config?.url?.includes('/login');
+  if (!isLoginRequest) {
+    console.log('🚫 Token inválido ou expirado. Fazendo logout...');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  }
+}
     
     // Se erro 500, mostrar mensagem genérica
     if (error.response?.status === 500) {

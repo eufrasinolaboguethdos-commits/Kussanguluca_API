@@ -1,21 +1,28 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { 
+import {
   FiPlus, FiEdit2, FiTrash2, FiX, FiSearch, FiFilter,
   FiTrendingUp, FiCalendar, FiDollarSign, FiDownload,
-  FiChevronLeft, FiChevronRight, FiMoreVertical
+  FiChevronLeft, FiChevronRight
 } from 'react-icons/fi';
 import { receitaService } from '../services/receitaService';
+import { useCompanyId } from '../hooks/useCompanyId';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 const Receitas = () => {
+  // Empresa ativa (hidrata do localStorage e valida)
+  const { companyId, loadingCompany } = useCompanyId();
+
+  // Estados de dados e UI
   const [receitas, setReceitas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
   const [receitaEditando, setReceitaEditando] = useState(null);
+
+  // Filtros & ordenação
   const [filtroTexto, setFiltroTexto] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [filtroDataInicio, setFiltroDataInicio] = useState('');
@@ -24,29 +31,41 @@ const Receitas = () => {
   const [itensPorPagina] = useState(10);
   const [ordenacao, setOrdenacao] = useState({ campo: 'data', direcao: 'desc' });
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
-  // Carregar receitas
+  // Habilita ações apenas quando houver empresa
+  const canCreate = !!companyId;
+
+  // Carregar receitas da empresa ativa
   const carregarReceitas = useCallback(async () => {
+    if (!companyId) {
+      setReceitas([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      const dados = await receitaService.getAll();
-      setReceitas(dados || []);
+      const dados = await receitaService.getAll(companyId);
+      setReceitas(Array.isArray(dados) ? dados : []);
     } catch (error) {
       console.error('Erro ao carregar receitas:', error);
-      alert('Erro ao carregar receitas. Verifique a conexão com o servidor.');
+      setReceitas([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [companyId]);
 
+  // Só dispara depois que o hook terminar de hidratar a empresa
   useEffect(() => {
-    carregarReceitas();
-  }, [carregarReceitas]);
+    if (!loadingCompany) carregarReceitas();
+  }, [loadingCompany, carregarReceitas]);
 
-  // Abrir modal para criar/editar
+  // Abrir/fechar modal
   const abrirModal = (receita = null) => {
+    if (!canCreate) return;
+
     if (receita) {
       setReceitaEditando(receita);
       reset({
@@ -73,20 +92,26 @@ const Receitas = () => {
     reset();
   };
 
-  // Salvar (criar ou atualizar)
+  // Criar/Atualizar
   const onSubmit = async (data) => {
+    if (!companyId) return;
+
     try {
       const payload = {
         ...data,
-        valor: parseFloat(data.valor)
+        valor: parseFloat(data.valor),
+        id_empresa: companyId
       };
 
       if (receitaEditando) {
-        await receitaService.update(receitaEditando.id_receita || receitaEditando.id, payload);
+        await receitaService.update(
+          receitaEditando.id_receita || receitaEditando.id,
+          payload
+        );
       } else {
         await receitaService.create(payload);
       }
-      
+
       fecharModal();
       carregarReceitas();
     } catch (error) {
@@ -97,6 +122,8 @@ const Receitas = () => {
 
   // Excluir
   const handleExcluir = async (id) => {
+    if (!canCreate) return;
+
     if (window.confirm('Tem certeza que deseja excluir esta receita? Esta ação não pode ser desfeita.')) {
       try {
         await receitaService.delete(id);
@@ -108,24 +135,7 @@ const Receitas = () => {
     }
   };
 
-  // Exportar para CSV
-  const exportarCSV = () => {
-    const headers = ['Data', 'Descrição', 'Categoria', 'Valor'];
-    const csvContent = [
-      headers.join(';'),
-      ...receitasFiltradas.map(r => 
-        [formatarData(r.data), r.descricao, r.categoria, r.valor].join(';')
-      )
-    ].join('\\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `receitas_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-  };
-
-  // Formatar valor em Kwanza
+  // Helpers de formatação
   const formatarValor = (valor) => {
     return new Intl.NumberFormat('pt-AO', {
       style: 'currency',
@@ -133,7 +143,6 @@ const Receitas = () => {
     }).format(valor || 0);
   };
 
-  // Formatar data
   const formatarData = (dataString) => {
     if (!dataString) return '-';
     try {
@@ -143,30 +152,31 @@ const Receitas = () => {
     }
   };
 
-  // Filtrar e ordenar
+  // Filtros, ordenação, paginação
   const receitasFiltradas = receitas
-    .filter(receita => {
-      const matchTexto = !filtroTexto || 
+    .filter((receita) => {
+      const matchTexto =
+        !filtroTexto ||
         receita.descricao?.toLowerCase().includes(filtroTexto.toLowerCase()) ||
         receita.categoria?.toLowerCase().includes(filtroTexto.toLowerCase());
-      
+
       const matchCategoria = !filtroCategoria || receita.categoria === filtroCategoria;
-      
+
       const dataReceita = new Date(receita.data);
       const matchDataInicio = !filtroDataInicio || dataReceita >= new Date(filtroDataInicio);
       const matchDataFim = !filtroDataFim || dataReceita <= new Date(filtroDataFim);
-      
+
       return matchTexto && matchCategoria && matchDataInicio && matchDataFim;
     })
     .sort((a, b) => {
       let valorA = a[ordenacao.campo];
       let valorB = b[ordenacao.campo];
-      
+
       if (ordenacao.campo === 'data') {
         valorA = new Date(valorA);
         valorB = new Date(valorB);
       }
-      
+
       if (ordenacao.direcao === 'asc') {
         return valorA > valorB ? 1 : -1;
       } else {
@@ -174,18 +184,31 @@ const Receitas = () => {
       }
     });
 
-  // Paginação
   const totalPaginas = Math.ceil(receitasFiltradas.length / itensPorPagina);
   const receitasPaginadas = receitasFiltradas.slice(
     (paginaAtual - 1) * itensPorPagina,
     paginaAtual * itensPorPagina
   );
 
-  // Estatísticas
   const totalReceitas = receitas.reduce((sum, r) => sum + parseFloat(r.valor || 0), 0);
   const totalFiltrado = receitasFiltradas.reduce((sum, r) => sum + parseFloat(r.valor || 0), 0);
+
+  // Categorias únicas (para o select)
   const categorias = [...new Set(receitas.map(r => r.categoria).filter(Boolean))];
 
+  // Guard de hidratação da empresa
+  if (loadingCompany) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">A preparar o ambiente da empresa...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loader da própria página
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -199,7 +222,7 @@ const Receitas = () => {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* Header com estatísticas */}
+      {/* Header */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
@@ -212,7 +235,7 @@ const Receitas = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -224,7 +247,7 @@ const Receitas = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -252,7 +275,7 @@ const Receitas = () => {
                 className="pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent w-full sm:w-80"
               />
             </div>
-            
+
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
@@ -263,18 +286,44 @@ const Receitas = () => {
               Filtros
             </button>
           </div>
-          
+
           <div className="flex gap-3 w-full lg:w-auto">
             <button
-              onClick={exportarCSV}
-              className="flex items-center gap-2 px-4 py-2.5 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              onClick={() => {
+                if (!canCreate) return;
+                const headers = ['Data', 'Descrição', 'Categoria', 'Valor'];
+                const csvContent = [
+                  headers.join(';'),
+                  ...receitasFiltradas.map(r =>
+                    [formatarData(r.data), r.descricao, r.categoria, r.valor].join(';')
+                  )
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `receitas_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+              }}
+              disabled={!canCreate}
+              className={`flex items-center gap-2 px-4 py-2.5 border rounded-lg transition-colors ${
+                !canCreate
+                  ? 'text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed'
+                  : 'text-gray-600 border-gray-200 hover:bg-gray-50'
+              }`}
             >
               <FiDownload size={18} />
               Exportar
             </button>
-            <Button 
-              onClick={() => abrirModal()} 
-              className="flex items-center gap-2 bg-green-500 hover:bg-green-600"
+
+            <Button
+              onClick={() => canCreate && abrirModal()}
+              disabled={!canCreate}
+              className={`flex items-center gap-2 ${
+                !canCreate
+                  ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                  : 'bg-green-500 hover:bg-green-600 text-white'
+              }`}
             >
               <FiPlus size={20} />
               Nova Receita
@@ -282,7 +331,6 @@ const Receitas = () => {
           </div>
         </div>
 
-        {/* Filtros avançados */}
         {showFilters && (
           <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in-up">
             <div>
@@ -293,11 +341,12 @@ const Receitas = () => {
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
               >
                 <option value="">Todas as categorias</option>
-                {categorias.map(cat => (
+                {categorias.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
               <input
@@ -307,6 +356,7 @@ const Receitas = () => {
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
               <input
@@ -326,27 +376,31 @@ const Receitas = () => {
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th 
+                <th
                   className="text-left py-4 px-6 text-sm font-semibold text-gray-600 cursor-pointer hover:text-gray-800"
                   onClick={() => setOrdenacao({ campo: 'data', direcao: ordenacao.direcao === 'asc' ? 'desc' : 'asc' })}
                 >
                   <div className="flex items-center gap-1">
                     Data
                     {ordenacao.campo === 'data' && (
-                      ordenacao.direcao === 'asc' ? <FiChevronLeft className="rotate-90" size={14} /> : <FiChevronLeft className="-rotate-90" size={14} />
+                      ordenacao.direcao === 'asc'
+                        ? <FiChevronLeft className="rotate-90" size={14} />
+                        : <FiChevronLeft className="-rotate-90" size={14} />
                     )}
                   </div>
                 </th>
                 <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Descrição</th>
                 <th className="text-left py-4 px-6 text-sm font-semibold text-gray-600">Categoria</th>
-                <th 
+                <th
                   className="text-right py-4 px-6 text-sm font-semibold text-gray-600 cursor-pointer hover:text-gray-800"
                   onClick={() => setOrdenacao({ campo: 'valor', direcao: ordenacao.direcao === 'asc' ? 'desc' : 'asc' })}
                 >
                   <div className="flex items-center justify-end gap-1">
                     Valor
                     {ordenacao.campo === 'valor' && (
-                      ordenacao.direcao === 'asc' ? <FiChevronLeft className="rotate-90" size={14} /> : <FiChevronLeft className="-rotate-90" size={14} />
+                      ordenacao.direcao === 'asc'
+                        ? <FiChevronLeft className="rotate-90" size={14} />
+                        : <FiChevronLeft className="-rotate-90" size={14} />
                     )}
                   </div>
                 </th>
@@ -395,6 +449,7 @@ const Receitas = () => {
                       <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => abrirModal(receita)}
+                          disabled={!canCreate}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Editar"
                         >
@@ -402,6 +457,7 @@ const Receitas = () => {
                         </button>
                         <button
                           onClick={() => handleExcluir(receita.id_receita || receita.id)}
+                          disabled={!canCreate}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Excluir"
                         >
@@ -465,18 +521,18 @@ const Receitas = () => {
                 <FiX size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
               <Input
                 label="Descrição *"
                 placeholder="Ex: Venda de produtos, Serviço prestado..."
                 error={errors.descricao}
-                {...register('descricao', { 
+                {...register('descricao', {
                   required: 'Descrição é obrigatória',
                   minLength: { value: 3, message: 'Mínimo 3 caracteres' }
                 })}
               />
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="Valor (AOA) *"
@@ -486,13 +542,13 @@ const Receitas = () => {
                   placeholder="0,00"
                   icon={<FiDollarSign className="text-gray-400" />}
                   error={errors.valor}
-                  {...register('valor', { 
+                  {...register('valor', {
                     required: 'Valor é obrigatório',
                     min: { value: 0.01, message: 'Valor deve ser maior que 0' },
                     valueAsNumber: true
                   })}
                 />
-                
+
                 <Input
                   label="Data *"
                   type="date"
@@ -500,7 +556,7 @@ const Receitas = () => {
                   {...register('data', { required: 'Data é obrigatória' })}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Categoria
@@ -539,6 +595,6 @@ const Receitas = () => {
       )}
     </div>
   );
-};
+}   
 
 export default Receitas;
