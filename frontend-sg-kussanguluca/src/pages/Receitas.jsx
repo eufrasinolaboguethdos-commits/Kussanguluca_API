@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import {
   FiPlus, FiEdit2, FiTrash2, FiX, FiSearch, FiFilter,
   FiTrendingUp, FiCalendar, FiDollarSign, FiDownload,
-  FiChevronLeft, FiChevronRight
+  FiChevronLeft, FiChevronRight, FiArrowLeft
 } from 'react-icons/fi';
 import { receitaService } from '../services/receitaService';
 import { useCompanyId } from '../hooks/useCompanyId';
@@ -11,10 +11,14 @@ import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const Receitas = () => {
   // Empresa ativa (hidrata do localStorage e valida)
   const { companyId, loadingCompany } = useCompanyId();
+  const navigate = useNavigate();
 
   // Estados de dados e UI
   const [receitas, setReceitas] = useState([]);
@@ -223,6 +227,13 @@ const Receitas = () => {
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Header */}
+      <button 
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+          >
+          <FiArrowLeft size={18} />
+            Voltar
+      </button>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
@@ -286,6 +297,7 @@ const Receitas = () => {
               Filtros
             </button>
           </div>
+          
 
           <div className="flex gap-3 w-full lg:w-auto">
             <button
@@ -319,7 +331,7 @@ const Receitas = () => {
             <Button
               onClick={() => canCreate && abrirModal()}
               disabled={!canCreate}
-              className={`flex items-center gap-2 ${
+              className={`flex items-center gap-2 rounded-xl pt-2 pb-1.5 px-4 ${
                 !canCreate
                   ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                   : 'bg-green-500 hover:bg-green-600 text-white'
@@ -577,14 +589,14 @@ const Receitas = () => {
                 <Button
                   type="button"
                   onClick={fecharModal}
-                  className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   isLoading={isSubmitting}
-                  className="flex-1 bg-green-500 hover:bg-green-600"
+                  className="flex-1 bg-green-500 hover:bg-green-600 rounded-xl text-white"
                 >
                   {receitaEditando ? 'Salvar Alterações' : 'Criar Receita'}
                 </Button>

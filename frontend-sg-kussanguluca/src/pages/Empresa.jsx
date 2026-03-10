@@ -32,6 +32,11 @@ const Empresas = () => {
       setLoading(true);
       const dados = await empresaService.getByUser();
       setEmpresas(dados);
+      const savedId = localStorage.getItem('activeCompanyId');
+        if (savedId && !activeCompany) {
+      const empresa = dados.find(e => String(e.id_empresa) === String(savedId));
+        if (empresa) setActiveCompany(empresa);
+    }
     } catch (error) {
       console.error('Erro ao carregar empresas:', error);
     } finally {
@@ -192,8 +197,10 @@ const handleSelecionar = (empresa) => {
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-16 h-16 bg-brand-100 rounded-xl flex items-center justify-center text-brand-600 text-2xl font-bold">
-                    {empresa.nome.charAt(0).toUpperCase()}
+                  <div className="w-14 h-14 rounded-full bg-brand-50 border-2 border-brand-200 flex items-center justify-center text-brand-500">
+                    
+                     {empresa.nome.split(' ').slice(0,2).map(p => p[0]).join('').toUpperCase()}
+                    
                   </div>
                   {activeCompany?.id_empresa === empresa.id_empresa && (
                     <span className="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-sm font-medium flex items-center gap-1">
@@ -208,13 +215,13 @@ const handleSelecionar = (empresa) => {
                   {empresa.setor} • NIF: {empresa.NIF}
                 </p>
                 
-                <div className="flex gap-2">
+                <div className="flex gap-2 mt-4">
                   <Button 
                     onClick={() => handleSelecionar(empresa)}
-                    className={`flex-1 ${
+                    className={`flex-1 rounded-xl text-sm font-medium transition-all ${
                       activeCompany?.id_empresa === empresa.id_empresa
                         ? 'bg-green-500 hover:bg-green-600'
-                        : ''
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                     disabled={activeCompany?.id_empresa === empresa.id_empresa}
                   >
@@ -222,13 +229,13 @@ const handleSelecionar = (empresa) => {
                   </Button>
                   <Button 
                     onClick={() => handleEditar(empresa)}
-                    className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className="rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 p-3"
                   >
                     <FiEdit2 size={18} />
                   </Button>
                   <Button 
                     onClick={() => handleExcluir(empresa.id_empresa)}
-                    className="bg-red-50 text-red-600 hover:bg-red-100"
+                    className="rounded-xl bg-red-50 text-red-500 hover:bg-red-100 p-3"
                   >
                     <FiTrash2 size={18} />
                   </Button>

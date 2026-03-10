@@ -203,7 +203,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Receitas</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">
+              <p className="text-lg md:text-2xl font-bold text-green-600 mt-1">
                 {formatarValor(stats.totalReceitas)}
               </p>
             </div>
@@ -218,7 +218,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Despesas</p>
-              <p className="text-2xl font-bold text-red-600 mt-1">
+              <p className="text-lg md:text-2xl font-bold text-red-600 mt-1">
                 {formatarValor(stats.totalDespesas)}
               </p>
             </div>
@@ -233,7 +233,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Saldo Líquido</p>
-              <p className={`text-2xl font-bold mt-1 ${stats.saldo >= 0 ? 'text-brand-600' : 'text-red-600'}`}>
+              <p className={`text-lg md:text-2xl font-bold mt-1 ${stats.saldo >= 0 ? 'text-brand-600' : 'text-red-600'}`}>
                 {formatarValor(stats.saldo)}
               </p>
             </div>
@@ -303,7 +303,7 @@ const Dashboard = () => {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-800">Transações Recentes</h3>
-          <button className="text-brand-500 hover:text-brand-700 text-sm font-medium">
+          <button onClick={() => navigate('/receitas')} className="text-brand-500 hover:text-brand-700 text-sm font-medium">
             Ver todas
           </button>
         </div>
@@ -313,15 +313,15 @@ const Dashboard = () => {
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Descrição</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Tipo</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Data</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 hidden sm:table-cell">Tipo</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600 hidden md:table-cell">Data</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Valor</th>
               </tr>
             </thead>
             <tbody>
               {stats.transacoesRecentes.map((transacao, index) => (
                 <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4 text-sm text-gray-800">{transacao.descricao}</td>
+                  <td className="py-3 px-4 hidden sm:table-cell text-sm text-gray-800">{transacao.descricao}</td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -333,7 +333,7 @@ const Dashboard = () => {
                       {transacao.valor > 0 ? 'Receita' : 'Despesa'}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
+                  <td className="py-3 px-4 text-sm text-gray-600 hidden md:table-cell">
                     <div className="flex items-center gap-2">
                       <FiCalendar size={14} />
                       {formatarData(transacao.data)}

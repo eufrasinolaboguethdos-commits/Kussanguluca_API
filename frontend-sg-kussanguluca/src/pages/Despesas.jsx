@@ -298,7 +298,7 @@ const Despesas = () => {
             <Button 
               onClick={() => abrirModal()}
               disabled={!canCreate}
-              className={`flex items-center gap-2 ${
+              className={`flex items-center gap-2 rounded-xl pt-2 pb-1.5 px-4 ${
                 !canCreate
                   ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                   : 'bg-red-500 hover:bg-red-600 text-white'
@@ -557,14 +557,14 @@ const Despesas = () => {
                 <Button
                   type="button"
                   onClick={fecharModal}
-                  className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   isLoading={isSubmitting}
-                  className="flex-1 bg-red-500 hover:bg-red-600"
+                  className="flex-1 bg-red-500 hover:bg-red-600 rounded-xl text-white"
                 >
                   {despesaEditando ? 'Salvar Alterações' : 'Criar Despesa'}
                 </Button>
