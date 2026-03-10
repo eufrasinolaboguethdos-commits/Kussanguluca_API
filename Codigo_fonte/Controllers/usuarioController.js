@@ -1,6 +1,7 @@
 import { criarUsuario, buscarUsuarioPorEmail, listarUsuarios, buscarUsuarioPorId, atualizarUsuario, deletarUsuario } from '../Models/usuarioModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { connection } from '../Config/db.js';
 
 export async function registrarUsuario(req, res) {
   try {
@@ -16,20 +17,43 @@ export async function registrarUsuario(req, res) {
 export async function loginUsuario(req, res) {
   try {
     const { email, senha } = req.body;
-    const usuario = await buscarUsuarioPorEmail(email, senha);
+    const usuario = await buscarUsuarioPorEmail(email);
 
-    if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+    if (!usuario) return res.status(401).json({ error: 'Usuário não encontrado' });
 
     const senhaValida = await bcrypt.compare(senha, usuario.senha);
     if (!senhaValida) return res.status(401).json({ error: 'Senha inválida' });
 
+    // Função interna para buscar a empresa
+    const buscarIdEmpresaPeloIdUsuario = async (id) => {
+      const [rows] = await connection.execute(
+        'SELECT id_empresa FROM empresa WHERE id_usuario = ?',
+        [id]
+      );
+      return rows[0]?.id_empresa;
+    };
 
-    const token = jwt.sign({ id: usuario.id_usuario, id_empresa: usuario.id_empresa, }, process.env.JWT_SECRET, { expiresIn: '3600s' });
-    res.json({ token });
+    // CORREÇÃO AQUI: Use "usuario.id_usuario" em vez de "req.usuario.id_Usuario"
+    const idEmpresa = await buscarIdEmpresaPeloIdUsuario(usuario.id_usuario);
+
+    const token = jwt.sign(
+      { id: usuario.id_usuario, id_empresa: idEmpresa || null }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '3600s' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: usuario.id_usuario,
+        nome: usuario.nome,
+        email: usuario.email,
+        id_empresa: idEmpresa
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-  
 }
 export async function obterUsuarios(req, res) {
   try {

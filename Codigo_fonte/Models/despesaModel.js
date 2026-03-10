@@ -22,7 +22,7 @@ export async function listarDespesas(id_empresa) {
     `SELECT * FROM Despesa
      WHERE id_empresa = ? AND apagado = 0
      ORDER BY data DESC`,
-    [id_empresa]
+    [id_empresa || null]
   );
 
   return rows;

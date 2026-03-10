@@ -20,7 +20,7 @@ export async function listarReceitas(id_empresa) {
     `SELECT * FROM Receita 
      WHERE id_empresa = ? AND apagado = 0
      ORDER BY data DESC`,
-    [id_empresa]
+    [id_empresa || null]
   );
 
   return rows;

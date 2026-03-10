@@ -12,6 +12,17 @@ import relatorioRoutes from "./Codigo_fonte/Routes/relatorioRoutes.js";
 dotenv.config();
 const app = express();
 
+// No topo do ficheiro
+//const cors = require('cors');
+
+// Depois de criar o app
+app.use(cors({
+  origin: 'http://localhost:5173', // URL do teu frontend
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(cors());
 app.use(express.json());
 

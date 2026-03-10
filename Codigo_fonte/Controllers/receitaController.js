@@ -19,15 +19,20 @@ export async function criar(req, res) {
       );
       return rows[0]?.id_empresa;
     };
-    
+
+
     console.log("usuario:", req.usuario);
     console.log("id_empresa:", await buscarIdEmpresaPeloIdUsuario(req.usuario.id));
     console.log("body:", req.body);
     const { data, valor, categoria, descricao } = req.body;
 
-
-    const id_empresa =  await buscarIdEmpresaPeloIdUsuario(req.usuario.id); 
-
+    const id_empresa =  await buscarIdEmpresaPeloIdUsuario(req.usuario.id);
+    
+     if (!id_empresa) {
+      return res.status(400).json({
+        error: "Usuário não possui empresa cadastrada"
+      });
+    }
     const id = await criarReceita({
       id_empresa,
       data,
