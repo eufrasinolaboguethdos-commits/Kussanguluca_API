@@ -62,39 +62,45 @@ const Relatorio = () => {
     gerarRelatorio(data);
   };
 
-  // Exportar para PDF (simulado)
-  const exportarPDF = () => {
-    window.print();
-  };
+  const exportarExcel = async () => {
+  if (!relatorio) return;
+  try {
+    const id_empresa = localStorage.getItem('activeCompanyId');
+    const response = await api.get('/exportar/excel', {
+      params: { id_empresa, dataInicio, dataFim },
+      responseType: 'blob'
+    });
+    const url = URL.createObjectURL(response.data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `relatorio_${dataInicio}_${dataFim}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('Erro ao exportar Excel:', err);
+    alert('Erro ao exportar Excel. Tente novamente.');
+  }
+};
 
-  // Exportar para Excel/CSV
-  const exportarCSV = () => {
-    if (!relatorio) return;
-    
-    const csvContent = [
-      ['Relatório Financeiro - SG Kussanguluca'],
-      [`Período: ${formatarData(dataInicio)} a ${formatarData(dataFim)}`],
-      [],
-      ['Resumo'],
-      ['Total Receitas', relatorio.totalReceitas],
-      ['Total Despesas', relatorio.totalDespesas],
-      ['Saldo', relatorio.saldo],
-      [],
-      ['Receitas Detalhadas'],
-      ['Data', 'Descrição', 'Categoria', 'Valor'],
-      ...relatorio.receitas.map(r => [r.data, r.descricao, r.categoria, r.valor]),
-      [],
-      ['Despesas Detalhadas'],
-      ['Data', 'Descrição', 'Categoria', 'Valor'],
-      ...relatorio.despesas.map(d => [d.data, d.descricao, d.categoria, d.valor])
-    ].map(row => row.join(';')).join('\\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `relatorio_${dataInicio}_${dataFim}.csv`;
-    link.click();
-  };
+const exportarPDF = async () => {
+  if (!relatorio) return;
+  try {
+    const id_empresa = localStorage.getItem('activeCompanyId');
+    const response = await api.get('/exportar/pdf', {
+      params: { id_empresa, dataInicio, dataFim },
+      responseType: 'blob'
+    });
+    const url = URL.createObjectURL(response.data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `relatorio_${dataInicio}_${dataFim}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('Erro ao exportar PDF:', err);
+    alert('Erro ao exportar PDF. Tente novamente.');
+  }
+};
 
   const formatarValor = (valor) => {
     return new Intl.NumberFormat('pt-AO', {
@@ -188,7 +194,7 @@ const Relatorio = () => {
         
         <div className="flex gap-3">
           <button
-            onClick={exportarCSV}
+            onClick={exportarExcel}
             disabled={!relatorio}
             className="flex items-center gap-2 px-4 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >

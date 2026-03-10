@@ -8,6 +8,10 @@ import despesaRoutes from './Codigo_fonte/Routes/despesaRoutes.js';
 import dashboardRoutes from "./Codigo_fonte/Routes/dashboardRoutes.js";
 import relatorioRoutes from "./Codigo_fonte/Routes/relatorioRoutes.js";
 import { httpLogger } from "./Codigo_fonte/Middleware/loggerMiddleware.js";
+import exportRoutes from './Codigo_fonte/Routes/exportRoutes.js';
+
+
+
 
 dotenv.config();
 const app = express();
@@ -33,6 +37,7 @@ app.use('/receitas', receitaRoutes);
 app.use('/despesas', despesaRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/relatorio", relatorioRoutes);
+app.use('/exportar', exportRoutes);
 
 
 app.get('/', (req, res) => {
