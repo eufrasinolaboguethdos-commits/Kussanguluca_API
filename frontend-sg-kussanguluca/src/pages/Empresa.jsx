@@ -152,12 +152,12 @@ const handleSelecionar = (empresa) => {
               Gerencie suas empresas e selecione qual usar
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={voltar} className="flex items-center gap-2 bg-gray-100 text-gray-700">
+          <div className="flex flex-col sm:flex-row gap-2 mt-2 sm:mt-0">
+            <Button onClick={voltar} className="flex items-center justify-center gap-2 bg-gray-100 text-gray-700 rounded-xl">
               <FiArrowLeft size={18} />
               Voltar
             </Button>
-            <Button onClick={handleCriar} className="flex items-center gap-2">
+            <Button onClick={handleCriar} className="flex items-center justify-center gap-2 rounded-xl">
               <FiPlus size={18} />
               Nova Empresa
             </Button>

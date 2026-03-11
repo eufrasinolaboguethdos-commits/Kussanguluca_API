@@ -26,8 +26,8 @@ const AuthLayout = () => {
       </div>
 
       {/* Lado Direito - O Formulário (Outlet) */}
-      <div className="w-full lg:w-1/2 flex justify-center items-center p-8 bg-white">
-        <div className="w-full max-w-md animate-fade-in-up">
+      <div className="w-full lg:w-1/2 flex justify-center items-center p-4 md:p-8 bg-white">
+        <div className="w-full max-w-md bg-white rounded-2xl p-6 md:p-8 animate-fade-in-up">
             {/* O 'Outlet' é onde o React Router vai injetar o Login ou o Registo */}
             <Outlet />
         </div>

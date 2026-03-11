@@ -220,12 +220,12 @@ const Despesas = () => {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-6 text-white shadow-lg md:col-span-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-4 md:p-6 text-white shadow-lg sm:col-span-2 md:col-span-2">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-red-100 text-sm font-medium">Total em Despesas</p>
-              <p className="text-3xl font-bold mt-1">{formatarValor(totalDespesas)}</p>
+              <p className="text-xl md:text-3xl font-bold mt-1">{formatarValor(totalDespesas)}</p>
             </div>
             <div className="p-3 bg-white bg-opacity-20 rounded-lg">
               <FiTrendingDown size={28} />
@@ -233,7 +233,7 @@ const Despesas = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
+        <div className="bg-white rounded-xl p-4 md:p-6 shadow-md border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500 text-sm font-medium">Média Mensal</p>
@@ -245,11 +245,11 @@ const Despesas = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
+        <div className="bg-white rounded-xl p-4 md:p-6 shadow-md border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500 text-sm font-medium">Total Filtrado</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">{formatarValor(totalFiltrado)}</p>
+              <p className="text-lg md:text-2xl font-bold text-gray-800 mt-1">{formatarValor(totalFiltrado)}</p>
             </div>
             <div className="p-3 bg-purple-50 rounded-lg">
               <FiFilter className="text-purple-500" size={24} />
@@ -282,36 +282,36 @@ const Despesas = () => {
             </button>
           </div>
           
-          <div className="flex gap-3 w-full lg:w-auto">
+          <div className="flex flex-wrap gap-2 w-full lg:w-auto">
             <button
               onClick={exportarCSV}
               disabled={!canCreate}
-              className={`flex items-center gap-2 px-4 py-2.5 border rounded-lg transition-colors ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 border rounded-lg transition-colors ${
                 !canCreate
                   ? 'text-gray-400 border-gray-200 bg-gray-100 cursor-not-allowed'
                   : 'text-gray-600 border-gray-200 hover:bg-gray-50'
               }`}
-            >
+               >
               <FiDownload size={18} />
-              Exportar
+              <span className="hidden sm:inline">Exportar</span>
             </button>
             <Button 
               onClick={() => abrirModal()}
               disabled={!canCreate}
-              className={`flex items-center gap-2 rounded-xl pt-2 pb-1.5 px-4 ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-xl pt-2 pb-1.5 px-4 ${
                 !canCreate
                   ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                   : 'bg-red-500 hover:bg-red-600 text-white'
               }`}
             >
               <FiPlus size={20} />
-              Nova Despesa
+              <span className="hidden sm:inline">Nova Despesa</span>
             </Button>
           </div>
         </div>
 
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in-up">
+          <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-in-up">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
               <select
