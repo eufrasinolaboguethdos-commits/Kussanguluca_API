@@ -2321,3 +2321,7 @@
 [2026-03-18 08:04:06] info: GET /relatorio?dataInicio=2026-03-01&dataFim=2026-03-31&id_empresa=1 304 54.973 ms
 [2026-03-18 08:04:18] info: GET /empresas 304 4.464 ms
 [2026-03-18 08:04:18] info: GET /empresas 304 6.356 ms
+[2026-03-18 08:53:12] info: GET /empresas 304 154.476 ms
+[2026-03-18 08:53:12] info: GET /empresas 304 5.053 ms
+[2026-03-18 08:53:12] info: GET /receitas?id_empresa=1 304 26.414 ms
+[2026-03-18 08:53:12] info: GET /despesas?id_empresa=1 304 88.138 ms
