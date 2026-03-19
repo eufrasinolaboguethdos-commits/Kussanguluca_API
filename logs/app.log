@@ -2398,3 +2398,7 @@
 [2026-03-18 20:31:42] info: GET /relatorio?dataInicio=2026-03-01&dataFim=2026-03-31&id_empresa=1 304 14.750 ms
 [2026-03-18 20:31:50] info: GET /exportar/pdf?id_empresa=1&dataInicio=2026-03-01&dataFim=2026-03-31 200 2910.894 ms
 [2026-03-18 20:32:06] info: GET /exportar/excel?id_empresa=1&dataInicio=2026-03-01&dataFim=2026-03-31 200 659.531 ms
+[2026-03-19 06:21:41] info: GET /relatorio?dataInicio=2026-03-01&dataFim=2026-03-31&id_empresa=1 401 100.670 ms
+[2026-03-19 06:21:41] info: GET /relatorio?dataInicio=2026-03-01&dataFim=2026-03-31&id_empresa=1 401 2.194 ms
+[2026-03-19 06:21:42] info: GET /relatorio?dataInicio=2026-03-01&dataFim=2026-03-31&id_empresa=1 401 1.554 ms
+[2026-03-19 06:21:42] info: GET /relatorio?dataInicio=2026-03-01&dataFim=2026-03-31&id_empresa=1 401 8.768 ms
