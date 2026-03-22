@@ -21,6 +21,7 @@ import Relatorio       from '../pages/Relatorio';
 import Empresa         from '../pages/Empresa';
 import CompanySelector from '../pages/CompanySelector';
 import Perfil from '../pages/Perfil';
+import Transacoes from '../pages/Transacoes';
 
 // Páginas Privadas — NOVAS
 import SaudeFinanceira from '../pages/SaudeFinanceira';
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
           { path: 'relatorios',       element: <Relatorio /> },
           { path: 'empresa',          element: <Empresa /> },
           { path: 'perfil', element: <Perfil /> },
+          { path: 'transacoes', element: <Transacoes /> },
 
           // ── NOVAS PÁGINAS DA PLATAFORMA ──
           { path: 'saude',  element: <SaudeFinanceira /> },

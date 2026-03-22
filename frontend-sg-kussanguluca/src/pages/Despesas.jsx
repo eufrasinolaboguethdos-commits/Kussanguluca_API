@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { 
+import {
   FiPlus, FiEdit2, FiTrash2, FiX, FiSearch, FiFilter,
   FiTrendingDown, FiCalendar, FiDollarSign, FiDownload,
   FiChevronLeft, FiChevronRight, FiAlertTriangle
@@ -95,9 +95,17 @@ const Despesas = () => {
 
   const exportarCSV = () => {
     if (!canCreate) return;
-    const headers = ['Data', 'Descrição', 'Categoria', 'Valor'];
-    const csvContent = [headers.join(';'), ...despesasFiltradas.map(d => [formatarData(d.data), d.descricao, d.categoria, d.valor].join(';'))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csv = [
+      '\uFEFF' + 'Data;Descrição;Categoria;Valor (AOA)',
+      ...despesasFiltradas.map(d => [
+        formatarData(d.data),
+        `"${d.descricao}"`,
+        d.categoria || 'Geral',
+        parseFloat(d.valor || 0).toFixed(2).replace('.', ',')
+      ].join(';'))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `despesas_${new Date().toISOString().split('T')[0]}.csv`;

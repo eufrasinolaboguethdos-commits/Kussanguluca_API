@@ -209,9 +209,8 @@ const Receitas = () => {
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
-                showFilters ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${showFilters ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
             >
               <FiFilter size={16} /> Filtros
             </button>
@@ -221,18 +220,26 @@ const Receitas = () => {
             <button
               onClick={() => {
                 if (!canCreate) return;
-                const headers = ['Data', 'Descrição', 'Categoria', 'Valor'];
-                const csvContent = [headers.join(';'), ...receitasFiltradas.map(r => [formatarData(r.data), r.descricao, r.categoria, r.valor].join(';'))].join('\n');
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                //const headers = ['Data', 'Descrição', 'Categoria', 'Valor'];
+                const csv = [
+                  '\uFEFF' + 'Data;Descrição;Categoria;Valor (AOA)',
+                  ...receitasFiltradas.map(r => [
+                    formatarData(r.data),
+                    `"${r.descricao}"`,
+                    r.categoria || 'Geral',
+                    parseFloat(r.valor || 0).toFixed(2).replace('.', ',')
+                  ].join(';'))
+                ].join('\n');
+
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = `receitas_${new Date().toISOString().split('T')[0]}.csv`;
                 link.click();
               }}
               disabled={!canCreate}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${
-                !canCreate ? 'text-gray-300 border-gray-100 bg-gray-50 cursor-not-allowed' : 'text-gray-600 border-gray-200 hover:bg-gray-50'
-              }`}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl text-sm font-medium transition-colors ${!canCreate ? 'text-gray-300 border-gray-100 bg-gray-50 cursor-not-allowed' : 'text-gray-600 border-gray-200 hover:bg-gray-50'
+                }`}
             >
               <FiDownload size={16} />
               <span className="hidden sm:inline">Exportar</span>
@@ -241,9 +248,8 @@ const Receitas = () => {
             <Button
               onClick={() => canCreate && abrirModal()}
               disabled={!canCreate}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold ${
-                !canCreate ? 'bg-gray-200 cursor-not-allowed text-gray-400' : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-200'
-              }`}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold ${!canCreate ? 'bg-gray-200 cursor-not-allowed text-gray-400' : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-200'
+                }`}
             >
               <FiPlus size={18} />
               <span className="hidden sm:inline">Nova Receita</span>

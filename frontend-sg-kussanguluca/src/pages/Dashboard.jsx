@@ -94,7 +94,7 @@ const Dashboard = () => {
 
         const totalRec  = (receitas || []).reduce((s, r) => s + toNumber(r.valor), 0);
         const totalDesp = (despesas || []).reduce((s, d) => s + toNumber(d.valor), 0);
-        const transacoesRecentes = [...(receitas || []), ...(despesas || [])]
+        const transacoesRecentes = [...(receitas || []).map(r => ({ ...r, tipo: 'receita' })), ...(despesas || []).map(d => ({ ...d, tipo: 'despesa' })),]
           .sort((a, b) => new Date(b.data) - new Date(a.data)).slice(0, 5);
 
         setStats({ totalReceitas: totalRec, totalDespesas: totalDesp, saldo: totalRec - totalDesp, transacoesRecentes });
@@ -315,7 +315,7 @@ const Dashboard = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold uppercase tracking-wide text-gray-400">Transações Recentes</h3>
-          <button onClick={() => navigate('/receitas')} className="text-xs font-semibold text-brand-500 hover:text-brand-700 px-3 py-1 rounded-lg hover:bg-brand-50 transition-colors">
+          <button onClick={() => navigate('/Transacoes')} className="text-xs font-semibold text-brand-500 hover:text-brand-700 px-3 py-1 rounded-lg hover:bg-brand-50 transition-colors">
             Ver todas →
           </button>
         </div>
@@ -334,14 +334,14 @@ const Dashboard = () => {
                 <tr key={i} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
                   <td className="py-3 px-2 hidden sm:table-cell text-sm font-medium text-gray-700">{t.descricao}</td>
                   <td className="py-3 px-2">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${t.valor > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
-                      {t.valor > 0 ? '↑ Receita' : '↓ Despesa'}
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${t.tipo === 'receita' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                      {t.tipo === 'receita' ? '↑ Receita' : '↓ Despesa'}
                     </span>
                   </td>
                   <td className="py-3 px-2 text-xs text-gray-400 hidden md:table-cell">
                     <div className="flex items-center gap-1.5"><FiCalendar size={12} />{formatarData(t.data)}</div>
                   </td>
-                  <td className={`py-3 px-2 text-sm font-bold text-right ${t.valor > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  <td className={`py-3 px-2 text-sm font-bold text-right ${t.tipo === 'receita' ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {formatarValor(Math.abs(t.valor))}
                   </td>
                 </tr>

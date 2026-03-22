@@ -131,7 +131,7 @@ const FluxoCaixa = () => {
       </div>
 
       {/* Gráfico principal */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-sm font-bold uppercase tracking-wide text-gray-400">
             Evolução Real + Projecção
@@ -154,8 +154,8 @@ const FluxoCaixa = () => {
             </div>
           </div>
         ) : (
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ width: '100%', height: 280 }}>
+            <ResponsiveContainer width="100%" height={280}>
               <ComposedChart data={dadosGrafico} margin={{ left: 10, right: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis
@@ -188,7 +188,7 @@ const FluxoCaixa = () => {
                   stroke="#6366f1"
                   strokeWidth={2.5}
                   dot={{ r: 4, fill: '#6366f1' }}
-                  strokeDasharray={(d) => d?.tipo === 'projectado' ? '5 5' : '0'}
+                  strokeDasharray="5 5"/*{(d) => d?.tipo === 'projectado' ? '5 5' : '0'}*/
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -204,8 +204,9 @@ const FluxoCaixa = () => {
               <FiActivity size={14} /> Projecção dos Próximos 3 Meses
             </h3>
           </div>
+          <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="w-full min-w-[400px]">
               <tr>
                 <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wide text-gray-400">Mês</th>
                 <th className="text-right py-3 px-4 text-xs font-semibold uppercase tracking-wide text-gray-400">Receita Prev.</th>
@@ -230,6 +231,7 @@ const FluxoCaixa = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

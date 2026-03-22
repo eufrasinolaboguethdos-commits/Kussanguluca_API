@@ -32,7 +32,7 @@ const AppLayout = () => {
         {/* ── Conteúdo principal ── */}
         <main
           id="main-content"
-          className="flex-1 p-3 md:p-6 mt-16 overflow-auto"
+          className="flex-1 p-2 sm:p-3 md:p-6 mt-16 overflow-auto"
           role="main"
           aria-label="Conteúdo principal"
         >
