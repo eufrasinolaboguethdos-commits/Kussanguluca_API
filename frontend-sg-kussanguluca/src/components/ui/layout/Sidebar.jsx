@@ -3,93 +3,127 @@ import { NavLink } from 'react-router-dom';
 import {
   FiPieChart, FiTrendingUp, FiTrendingDown, FiFileText,
   FiBriefcase, FiShield, FiCreditCard, FiTarget, FiActivity,
-  FiChevronDown, FiChevronUp
+  FiChevronDown, FiChevronUp, FiX
 } from 'react-icons/fi';
 
-const Sidebar = () => {
-  //const [financasAberto, setFinancasAberto] = useState(false);
+const Sidebar = ({ aberto, fechar }) => {
   const [plataformaAberto, setPlataformaAberto] = useState(true);
 
   const menuPrincipal = [
-    { name: 'Dashboard',   link: '/dashboard',  icon: FiPieChart },
-    { name: 'Receitas',    link: '/receitas',   icon: FiTrendingUp },
-    { name: 'Despesas',    link: '/despesas',   icon: FiTrendingDown },
-    { name: 'Relatórios',  link: '/relatorios', icon: FiFileText },
-    { name: 'Empresa',     link: '/empresa',    icon: FiBriefcase },
+    { name: 'Dashboard',  link: '/dashboard',  icon: FiPieChart },
+    { name: 'Receitas',   link: '/receitas',   icon: FiTrendingUp },
+    { name: 'Despesas',   link: '/despesas',   icon: FiTrendingDown },
+    { name: 'Relatórios', link: '/relatorios', icon: FiFileText },
+    { name: 'Empresa',    link: '/empresa',    icon: FiBriefcase },
   ];
 
   const menuPlataforma = [
-    { name: 'Saúde Financeira', link: '/saude',   icon: FiShield },
-    { name: 'Fluxo de Caixa',   link: '/fluxo',   icon: FiActivity },
-    { name: 'Contas',            link: '/contas',  icon: FiCreditCard },
-    { name: 'Metas',             link: '/metas',   icon: FiTarget },
+    { name: 'Saúde Financeira', link: '/saude',  icon: FiShield },
+    { name: 'Fluxo de Caixa',   link: '/fluxo',  icon: FiActivity },
+    { name: 'Contas',           link: '/contas', icon: FiCreditCard },
+    { name: 'Metas',            link: '/metas',  icon: FiTarget },
   ];
 
   const itemClass = ({ isActive }) =>
-    `flex items-center gap-4 px-6 py-3.5 text-gray-100 transition duration-200 hover:bg-brand-600 ${
-      isActive ? 'bg-brand-600 border-r-4 border-white font-semibold' : ''
+    `flex items-center gap-3 px-4 py-3 mx-2 rounded-xl text-gray-200 transition-all duration-150 hover:bg-brand-600/60 ${
+      isActive ? 'bg-brand-600 text-white font-semibold shadow-sm' : ''
     }`;
 
+  const handleNavClick = () => {
+    if (fechar) fechar(); // fecha sidebar no mobile ao clicar num link
+  };
+
   return (
-    <aside className="bg-brand-700 fixed h-screen w-64 hidden lg:flex flex-col transition-all duration-300 z-20 overflow-y-auto">
-
-      {/* Logo */}
-      <div className="h-16 flex items-center justify-center text-white font-bold text-xl shadow-md bg-brand-800 flex-shrink-0">
-        SG Kussanguluca
-      </div>
-
-      <nav className="flex-1 py-4">
-
-        {/* ── Secção Principal ── */}
-        <div className="px-4 mb-2">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-300">Principal</p>
-        </div>
-        <ul className="mb-4">
-          {menuPrincipal.map((menu, i) => (
-            <li key={i}>
-              <NavLink to={menu.link} className={itemClass}>
-                <menu.icon size={20} />
-                <span className="font-medium text-sm">{menu.name}</span>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-
-        {/* Divisor */}
-        <div className="mx-4 border-t border-brand-600 my-2" />
-
-        {/* ── Secção Plataforma ── */}
-        <div className="px-4 mt-4 mb-2">
+    <>
+      {/* ── Sidebar desktop (sempre visível em lg+) ── */}
+      <aside
+        className={`
+          bg-brand-700 fixed h-screen w-64 flex flex-col z-20
+          transition-transform duration-300 ease-in-out
+          ${aberto ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+        `}
+        aria-label="Menu de navegação lateral"
+        role="navigation"
+      >
+        {/* Logo + botão fechar mobile */}
+        <div className="h-16 flex items-center justify-between px-4 bg-brand-800 flex-shrink-0">
+          <span className="text-white font-bold text-lg tracking-tight">SG Kussanguluca</span>
           <button
-            onClick={() => setPlataformaAberto(!plataformaAberto)}
-            className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-widest text-brand-300 hover:text-white transition-colors"
+            onClick={fechar}
+            className="lg:hidden p-1.5 text-brand-300 hover:text-white hover:bg-brand-600 rounded-lg transition-colors"
+            aria-label="Fechar menu"
           >
-            <span>Plataforma</span>
-            {plataformaAberto
-              ? <FiChevronUp size={14} />
-              : <FiChevronDown size={14} />}
+            <FiX size={20} />
           </button>
         </div>
 
-        {plataformaAberto && (
-          <ul>
-            {menuPlataforma.map((menu, i) => (
+        {/* Menu */}
+        <nav className="flex-1 py-4 overflow-y-auto" aria-label="Navegação principal">
+
+          {/* Principal */}
+          <div className="px-4 mb-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-400">Principal</p>
+          </div>
+          <ul role="list" className="mb-3 space-y-0.5">
+            {menuPrincipal.map((menu, i) => (
               <li key={i}>
-                <NavLink to={menu.link} className={itemClass}>
-                  <menu.icon size={20} />
-                  <span className="font-medium text-sm">{menu.name}</span>
+                <NavLink
+                  to={menu.link}
+                  className={itemClass}
+                  onClick={handleNavClick}
+                  aria-label={menu.name}
+                >
+                  <menu.icon size={18} aria-hidden="true" />
+                  <span className="text-sm">{menu.name}</span>
                 </NavLink>
               </li>
             ))}
           </ul>
-        )}
-      </nav>
 
-      {/* Footer */}
-      <div className="p-4 text-xs text-brand-300 text-center flex-shrink-0 border-t border-brand-600">
-        © 2026 SG Kussanguluca
-      </div>
-    </aside>
+          {/* Divisor */}
+          <div className="mx-4 border-t border-brand-600 my-3" role="separator" />
+
+          {/* Plataforma */}
+          <div className="px-4 mb-2">
+            <button
+              onClick={() => setPlataformaAberto(!plataformaAberto)}
+              className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-widest text-brand-400 hover:text-white transition-colors"
+              aria-expanded={plataformaAberto}
+              aria-controls="menu-plataforma"
+            >
+              <span>Plataforma</span>
+              {plataformaAberto
+                ? <FiChevronUp size={13} aria-hidden="true" />
+                : <FiChevronDown size={13} aria-hidden="true" />}
+            </button>
+          </div>
+
+          {plataformaAberto && (
+            <ul id="menu-plataforma" role="list" className="space-y-0.5">
+              {menuPlataforma.map((menu, i) => (
+                <li key={i}>
+                  <NavLink
+                    to={menu.link}
+                    className={itemClass}
+                    onClick={handleNavClick}
+                    aria-label={menu.name}
+                  >
+                    <menu.icon size={18} aria-hidden="true" />
+                    <span className="text-sm">{menu.name}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          )}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 text-xs text-brand-400 text-center border-t border-brand-600 flex-shrink-0">
+          © 2026 SG Kussanguluca
+        </div>
+      </aside>
+    </>
   );
 };
 
