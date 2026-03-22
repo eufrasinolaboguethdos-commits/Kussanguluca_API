@@ -3428,3 +3428,11 @@
 [2026-03-22 22:57:35] info: GET /metas/actual?id_empresa=1 304 10.291 ms
 [2026-03-22 22:57:35] info: GET /fluxo?id_empresa=1 304 4.854 ms
 [2026-03-22 22:57:35] info: GET /contas/resumo?id_empresa=1 304 2.541 ms
+[2026-03-22 22:59:01] info: GET /contas?id_empresa=1&estado=pendente 304 24.956 ms
+[2026-03-22 22:59:01] info: GET /saude?id_empresa=1 304 9.033 ms
+[2026-03-22 22:59:01] info: GET /metas/actual?id_empresa=1 304 3.624 ms
+[2026-03-22 22:59:01] info: GET /fluxo?id_empresa=1 304 3.545 ms
+[2026-03-22 22:59:01] info: GET /contas/resumo?id_empresa=1 304 2.249 ms
+[2026-03-22 22:59:01] info: GET /relatorio?dataInicio=2026-03-01&dataFim=2026-03-31&id_empresa=1 304 81.201 ms
+[2026-03-22 22:59:01] info: GET /relatorio?dataInicio=2026-03-01&dataFim=2026-03-31&id_empresa=1 304 5.679 ms
+[2026-03-22 22:59:05] info: GET /exportar/pdf?id_empresa=1&dataInicio=2026-03-01&dataFim=2026-03-31 200 2230.478 ms
