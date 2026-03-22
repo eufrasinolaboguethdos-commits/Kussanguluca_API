@@ -9,9 +9,11 @@ import dashboardRoutes from "./Codigo_fonte/Routes/dashboardRoutes.js";
 import relatorioRoutes from "./Codigo_fonte/Routes/relatorioRoutes.js";
 import { httpLogger } from "./Codigo_fonte/Middleware/loggerMiddleware.js";
 import exportRoutes from './Codigo_fonte/Routes/exportRoutes.js';
-
-
-
+import saudeRoutes  from './Codigo_fonte/Routes/saudeRoutes.js';
+import contaRoutes  from './Codigo_fonte/Routes/contaRoutes.js';
+import metaRoutes   from './Codigo_fonte/Routes/metaRoutes.js';
+import fluxoRoutes  from './Codigo_fonte/Routes/fluxoRoutes.js';
+ 
 
 dotenv.config();
 const app = express();
@@ -38,6 +40,10 @@ app.use('/despesas', despesaRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/relatorio", relatorioRoutes);
 app.use('/exportar', exportRoutes);
+app.use('/saude',   saudeRoutes);
+app.use('/contas',  contaRoutes);
+app.use('/metas',   metaRoutes);
+app.use('/fluxo',   fluxoRoutes);
 
 
 app.get('/', (req, res) => {
