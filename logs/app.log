@@ -3983,3 +3983,10 @@
 [2026-03-23 01:10:02] info: GET /taxa-cambio 304 4.322 ms
 [2026-03-23 01:10:02] info: GET /taxa-cambio/historico?limite=30 500 4.153 ms
 [2026-03-23 01:10:02] info: GET /taxa-cambio 304 3.290 ms
+[2026-03-23 01:37:30] info: GET /empresas 304 116.937 ms
+[2026-03-23 01:37:30] info: GET /empresas 304 2.589 ms
+[2026-03-23 01:37:30] info: GET /receitas?id_empresa=1 304 17.995 ms
+[2026-03-23 01:37:30] info: GET /despesas?id_empresa=1 304 16.712 ms
+[2026-03-23 01:37:30] info: GET /metas/actual?id_empresa=1 304 30.202 ms
+[2026-03-23 01:37:30] info: GET /contas/resumo?id_empresa=1 304 27.313 ms
+[2026-03-23 01:37:30] info: GET /saude?id_empresa=1 304 59.406 ms
