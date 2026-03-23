@@ -13,6 +13,8 @@ import saudeRoutes  from './Codigo_fonte/Routes/saudeRoutes.js';
 import contaRoutes  from './Codigo_fonte/Routes/contaRoutes.js';
 import metaRoutes   from './Codigo_fonte/Routes/metaRoutes.js';
 import fluxoRoutes  from './Codigo_fonte/Routes/fluxoRoutes.js';
+import taxaRoutes from './Codigo_fonte/Routes/taxaRoutes.js';
+
  
 
 dotenv.config();
@@ -44,6 +46,7 @@ app.use('/saude',   saudeRoutes);
 app.use('/contas',  contaRoutes);
 app.use('/metas',   metaRoutes);
 app.use('/fluxo',   fluxoRoutes);
+app.use('/taxa-cambio', taxaRoutes);
 
 
 app.get('/', (req, res) => {

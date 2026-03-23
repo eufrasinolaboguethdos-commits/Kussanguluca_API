@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   FiPieChart, FiTrendingUp, FiTrendingDown, FiFileText,
   FiBriefcase, FiShield, FiCreditCard, FiTarget, FiActivity,
-  FiChevronDown, FiChevronUp, FiX
+  FiChevronDown, FiChevronUp, FiX, FiDollarSign
 } from 'react-icons/fi';
 
 const Sidebar = ({ aberto, fechar }) => {
@@ -22,6 +22,7 @@ const Sidebar = ({ aberto, fechar }) => {
     { name: 'Fluxo de Caixa',   link: '/fluxo',  icon: FiActivity },
     { name: 'Contas',           link: '/contas', icon: FiCreditCard },
     { name: 'Metas',            link: '/metas',  icon: FiTarget },
+    { name: 'Taxa de Câmbio', link: '/taxa-cambio', icon: FiDollarSign },
   ];
 
   const itemClass = ({ isActive }) =>

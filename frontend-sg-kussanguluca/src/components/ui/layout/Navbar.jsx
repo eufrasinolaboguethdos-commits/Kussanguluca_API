@@ -21,6 +21,7 @@ const TITULOS = {
   '/contas':     'Contas',
   '/metas':      'Metas',
   '/perfil':     'Perfil',
+  '/taxa-cambio': 'Taxa de Câmbio',
 };
 
 // Ícone por tipo de notificação
