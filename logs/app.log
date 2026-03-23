@@ -3990,3 +3990,7 @@
 [2026-03-23 01:37:30] info: GET /metas/actual?id_empresa=1 304 30.202 ms
 [2026-03-23 01:37:30] info: GET /contas/resumo?id_empresa=1 304 27.313 ms
 [2026-03-23 01:37:30] info: GET /saude?id_empresa=1 304 59.406 ms
+[2026-03-23 04:24:37] info: GET /empresas 401 26.476 ms
+[2026-03-23 04:24:37] info: GET /empresas 401 1.650 ms
+[2026-03-23 04:24:37] info: GET /empresas 401 0.826 ms
+[2026-03-23 04:24:37] info: GET /empresas 401 1.875 ms
