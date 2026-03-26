@@ -58,7 +58,7 @@ const BADGE = {
 
 const Navbar = ({ abrirSidebar }) => {
   const { user, signOut } = useAuth();
-  const { companyId } = useCompanyId();
+  const { companyId, loadingCompany } = useCompanyId(); // ← agora usa loadingCompany
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -75,7 +75,11 @@ const Navbar = ({ abrirSidebar }) => {
 
   // Carrega notificações ao montar e a cada 5 minutos
   useEffect(() => {
-    if (!companyId) return;
+    if (loadingCompany) return; // ← aguarda o hook terminar de carregar
+    if (!companyId) {
+      setNotificacoes([]);
+      return;
+    }
     const carregar = async () => {
       setCarregando(true);
       try {
@@ -87,13 +91,17 @@ const Navbar = ({ abrirSidebar }) => {
     carregar();
     const intervalo = setInterval(carregar, 5 * 60 * 1000);
     return () => clearInterval(intervalo);
-  }, [companyId]);
+  }, [companyId, loadingCompany]); // ← loadingCompany na dependência
 
   // Recarrega ao mudar de rota
   useEffect(() => {
-    if (!companyId) return;
+    if (loadingCompany) return; // ← aguarda o hook terminar de carregar
+    if (!companyId) {
+      setNotificacoes([]);
+      return;
+    }
     notificacaoService.obterTodas(companyId).then(setNotificacoes).catch(() => {});
-  }, [location.pathname, companyId]);
+  }, [location.pathname, companyId, loadingCompany]); // ← loadingCompany na dependência
 
   // Fecha painel ao clicar fora
   useEffect(() => {
