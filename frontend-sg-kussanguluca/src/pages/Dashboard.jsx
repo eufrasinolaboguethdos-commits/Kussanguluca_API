@@ -94,8 +94,10 @@ const Dashboard = () => {
 
         const totalRec  = (receitas || []).reduce((s, r) => s + toNumber(r.valor), 0);
         const totalDesp = (despesas || []).reduce((s, d) => s + toNumber(d.valor), 0);
-        const transacoesRecentes = [...(receitas || []).map(r => ({ ...r, tipo: 'receita' })), ...(despesas || []).map(d => ({ ...d, tipo: 'despesa' })),]
-          .sort((a, b) => new Date(b.data) - new Date(a.data)).slice(0, 5);
+        const transacoesRecentes = [
+          ...(receitas || []).map(r => ({ ...r, tipo: 'receita' })),
+          ...(despesas || []).map(d => ({ ...d, tipo: 'despesa' })),
+        ].sort((a, b) => new Date(b.data) - new Date(a.data)).slice(0, 5);
 
         setStats({ totalReceitas: totalRec, totalDespesas: totalDesp, saldo: totalRec - totalDesp, transacoesRecentes });
         setDadosGrafico([
@@ -277,12 +279,22 @@ const Dashboard = () => {
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* Distribuição Financeira */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h3 className="text-sm font-bold uppercase tracking-wide text-gray-400 mb-4">Distribuição Financeira</h3>
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-56 min-h-[224px]">
+            <ResponsiveContainer width="100%" height={224}>
               <PieChart>
-                <Pie data={dadosGrafico} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={5} dataKey="value">
+                <Pie
+                  data={dadosGrafico}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
                   {dadosGrafico.map((e, i) => <Cell key={i} fill={e.color} />)}
                 </Pie>
                 <Tooltip formatter={(v) => formatarValor(v)} contentStyle={tooltipStyle} />
@@ -292,15 +304,26 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Evolução Mensal */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h3 className="text-sm font-bold uppercase tracking-wide text-gray-400 mb-4">Evolução Mensal</h3>
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-56 min-h-[224px]">
+            <ResponsiveContainer width="100%" height={224}>
               <BarChart data={evolucaoMensal} margin={{ left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis width={60} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false}
-                  tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
+                <XAxis
+                  dataKey="mes"
+                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  width={60}
+                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v}
+                />
                 <Tooltip formatter={(v) => formatarValor(v)} contentStyle={tooltipStyle} />
                 <Legend />
                 <Bar dataKey="receitas" fill="#10b981" name="Receitas" radius={[4,4,0,0]} />

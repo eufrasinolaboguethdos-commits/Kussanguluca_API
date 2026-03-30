@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/ui/layout/Sidebar.jsx';
 import Navbar from '../components/ui/layout/Navbar.jsx';
 import BotaoAjuda from '../components/ui/BotaoAjuda';
+import AgenteIA from '../components/ai/AgenteIA';
 
 const AppLayout = () => {
   const [sidebarAberto, setSidebarAberto] = useState(false);
@@ -46,6 +47,9 @@ const AppLayout = () => {
           </div>
         </main>
         <BotaoAjuda />
+        <AgenteIA
+        />
+        {/*<AgenteFinanceiro />*/}
       </div>
     </div>
   );

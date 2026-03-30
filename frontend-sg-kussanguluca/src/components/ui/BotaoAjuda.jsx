@@ -218,7 +218,7 @@ const BotaoAjuda = () => {
       {/* Botão flutuante */}
       <button
         onClick={() => setAberto(!aberto)}
-        className={`w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-blue-600 text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl ${aberto ? 'rotate-12' : ''}`}
+        className={`w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-gray-300 shadow-sm flex items-center justify-center transition-all duration-300 opacity-30 hover:opacity-100 hover:bg-gradient-to-br hover:from-brand-500 hover:to-blue-600 hover:text-white hover:scale-110 hover:shadow-xl ${aberto ? 'rotate-12 opacity-100 bg-gradient-to-br from-brand-500 to-blue-600 text-white' : ''}`}
         aria-label="Ajuda"
         title="Ajuda"
       >
