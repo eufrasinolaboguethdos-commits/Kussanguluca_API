@@ -36,7 +36,13 @@ const SaudeFinanceira = () => {
     };
 
     useEffect(() => {
-        if (!loadingCompany) carregarSaude();
+
+        if (loadingCompany) return;
+        if (!companyId) {
+            setLoading(false); // ← para o loading
+            return;
+        }
+        carregarSaude();
     }, [companyId, loadingCompany]);
 
     if (loadingCompany || loading) {
@@ -45,6 +51,16 @@ const SaudeFinanceira = () => {
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-14 w-14 border-b-4 border-brand-500 mx-auto"></div>
                     <p className="mt-4 text-gray-400 text-sm">A calcular saúde financeira...</p>
+                </div>
+            </div>
+        );
+    }
+    if (!companyId && !loadingCompany) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                    <p className="text-gray-400 font-semibold">Nenhuma empresa seleccionada</p>
+                    <p className="text-gray-300 text-sm mt-1">Selecciona ou cria uma empresa para ver este conteúdo</p>
                 </div>
             </div>
         );

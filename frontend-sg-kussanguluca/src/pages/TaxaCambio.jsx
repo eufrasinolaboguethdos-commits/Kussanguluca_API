@@ -6,6 +6,7 @@ import {
   FiArrowLeft, FiCheckCircle, FiAlertTriangle,
   FiCalendar, FiTrendingUp
 } from 'react-icons/fi';
+import { useCompanyId } from '../hooks/useCompanyId';
 import { taxaService } from '../services/taxaService';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -21,12 +22,12 @@ const formatarData = (d) => {
   try { return format(new Date(d), 'dd/MM/yyyy', { locale: pt }); }
   catch { return d; }
 };
-
 const formatarValor = (v) =>
   new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(v || 0);
 
 const TaxaCambio = () => {
   const navigate = useNavigate();
+  const { companyId, loadingCompany } = useCompanyId()
   const [taxaActual, setTaxaActual] = useState(null);
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,8 +48,8 @@ const TaxaCambio = () => {
     try {
       setLoading(true);
       const [actual, hist] = await Promise.all([
-        taxaService.obterActual().catch(() => null),
-        taxaService.historico(30).catch(() => []),
+        taxaService.obterActual(companyId).catch(() => null),
+        taxaService.historico(companyId,30).catch(() => []),
       ]);
       setTaxaActual(actual);
       setHistorico(hist || []);
@@ -56,12 +57,19 @@ const TaxaCambio = () => {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => {  
+    if (loadingCompany) return; 
+    if (!companyId){ 
+      setLoading(false);
+       return;
+      } carregar();
+     }, [companyId, loadingCompany]);
 
   const onSubmit = async (data) => {
     try {
       setErro('');
       await taxaService.registar({
+        id_empresa: companyId,
         data: data.data,
         usd_para_kz: parseFloat(data.usd_para_kz),
         eur_para_kz: data.eur_para_kz ? parseFloat(data.eur_para_kz) : null,
@@ -88,7 +96,7 @@ const TaxaCambio = () => {
   const handleConverter = async () => {
     if (!valorConverter || !moedaConverter) return;
     try {
-      const resultado = await taxaService.converter(valorConverter, moedaConverter);
+      const resultado = await taxaService.converter(valorConverter, moedaConverter, companyId);
       setResultadoConverter(resultado);
     } catch { /* ignorar erro */ }
   };
@@ -107,6 +115,16 @@ const TaxaCambio = () => {
       </div>
     );
   }
+  if (!companyId && !loadingCompany) {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <p className="text-gray-400 font-semibold">Nenhuma empresa seleccionada</p>
+        <p className="text-gray-300 text-sm mt-1">Selecciona ou cria uma empresa para ver este conteúdo</p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="space-y-5 animate-fade-in-up max-w-5xl mx-auto">

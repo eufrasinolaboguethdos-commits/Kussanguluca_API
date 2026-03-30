@@ -12,7 +12,7 @@ import Input from '../components/ui/Input';
 const formatarValor = (v) =>
   new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(v || 0);
 
-const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
 const BarraProgresso = ({ valor, /*max = 100,*/ cor }) => {
   const perc = Math.min(valor, 100);
@@ -57,7 +57,12 @@ const Metas = () => {
 
   useEffect(() => {
     if (!loadingCompany) carregar();
+    if (!companyId) {
+      setLoading(false); // ← para o loading
+      return;
+    }
   }, [companyId, loadingCompany]);
+
 
   const onSubmit = async (data) => {
     try {
@@ -71,7 +76,7 @@ const Metas = () => {
       setModalAberto(false);
       carregar();
     } catch (err) {
-        console.error(err);
+      console.error(err);
       alert('Erro ao criar meta.');
     }
   };
@@ -86,6 +91,16 @@ const Metas = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-14 w-14 border-b-4 border-brand-500 mx-auto"></div>
+      </div>
+    );
+  }
+  if (!companyId && !loadingCompany) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-gray-400 font-semibold">Nenhuma empresa seleccionada</p>
+          <p className="text-gray-300 text-sm mt-1">Selecciona ou cria uma empresa para ver este conteúdo</p>
+        </div>
       </div>
     );
   }
@@ -115,13 +130,12 @@ const Metas = () => {
             <h3 className="font-bold text-gray-800">
               Meta de {MESES[metaActual.mes - 1]} {metaActual.ano}
             </h3>
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              metaActual.estado === 'meta_atingida' ? 'bg-emerald-50 text-emerald-700' :
-              metaActual.estado === 'meta_falhada'  ? 'bg-rose-50 text-rose-700' :
-              'bg-blue-50 text-blue-700'
-            }`}>
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${metaActual.estado === 'meta_atingida' ? 'bg-emerald-50 text-emerald-700' :
+              metaActual.estado === 'meta_falhada' ? 'bg-rose-50 text-rose-700' :
+                'bg-blue-50 text-blue-700'
+              }`}>
               {metaActual.estado === 'meta_atingida' ? '✓ Meta Atingida' :
-               metaActual.estado === 'meta_falhada'  ? '✗ Meta Falhada' : '⏳ Em Curso'}
+                metaActual.estado === 'meta_falhada' ? '✗ Meta Falhada' : '⏳ Em Curso'}
             </span>
           </div>
 
@@ -216,11 +230,10 @@ const Metas = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                    meta.estado === 'meta_atingida' ? 'bg-emerald-50 text-emerald-700' :
-                    meta.estado === 'meta_falhada'  ? 'bg-rose-50 text-rose-700' :
-                    'bg-blue-50 text-blue-700'
-                  }`}>
+                  <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${meta.estado === 'meta_atingida' ? 'bg-emerald-50 text-emerald-700' :
+                    meta.estado === 'meta_falhada' ? 'bg-rose-50 text-rose-700' :
+                      'bg-blue-50 text-blue-700'
+                    }`}>
                     {meta.progressoReceita?.toFixed(0)}%
                   </span>
                   <button onClick={() => handleEliminar(meta.id_meta)}

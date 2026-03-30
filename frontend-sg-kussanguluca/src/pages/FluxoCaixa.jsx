@@ -45,6 +45,16 @@ const FluxoCaixa = () => {
       </div>
     );
   }
+  if (!companyId && !loadingCompany) {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <p className="text-gray-400 font-semibold">Nenhuma empresa seleccionada</p>
+        <p className="text-gray-300 text-sm mt-1">Selecciona ou cria uma empresa para ver este conteúdo</p>
+      </div>
+    </div>
+  );
+}
 
   // Combina fluxo real com projecção
   const dadosReaisComTipo = (dados?.fluxoReal || []).map(d => ({ ...d, tipo: 'real' }));

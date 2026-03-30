@@ -47,6 +47,10 @@ const Contas = () => {
 
   useEffect(() => {
     if (!loadingCompany) carregar();
+    if (!companyId) {
+      setLoading(false); // ← para o loading
+      return;
+    }
   }, [companyId, loadingCompany, filtroTipo, filtroEstado]);
 
   const onSubmit = async (data) => {
@@ -56,7 +60,7 @@ const Contas = () => {
       setModalAberto(false);
       carregar();
     } catch (err) {
-        console.error(err);
+      console.error(err);
       alert('Erro ao criar conta.');
     }
   };
@@ -74,9 +78,9 @@ const Contas = () => {
   };
 
   const estadoCor = {
-    pendente:  'bg-amber-50 text-amber-700 border-amber-200',
-    pago:      'bg-emerald-50 text-emerald-700 border-emerald-200',
-    vencido:   'bg-rose-50 text-rose-700 border-rose-200',
+    pendente: 'bg-amber-50 text-amber-700 border-amber-200',
+    pago: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    vencido: 'bg-rose-50 text-rose-700 border-rose-200',
     cancelado: 'bg-gray-50 text-gray-500 border-gray-200',
   };
 
@@ -87,6 +91,16 @@ const Contas = () => {
       </div>
     );
   }
+  if (!companyId && !loadingCompany) {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <p className="text-gray-400 font-semibold">Nenhuma empresa seleccionada</p>
+        <p className="text-gray-300 text-sm mt-1">Selecciona ou cria uma empresa para ver este conteúdo</p>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="space-y-5 animate-fade-in-up">

@@ -12,12 +12,33 @@ import Button from '../components/ui/Button';
 import { api } from '../services/api';
 
 const Perfil = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [abaActiva, setAbaActiva] = useState('info');
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
-  const [etapaEliminacao, setEtapaEliminacao] = useState('idle');
+  const [etapaEliminacao, setEtapaEliminacao] = useState(() => {
+    const guardado = localStorage.getItem('eliminacao_etapa');
+    if (!guardado) return 'idle';
+    const { etapa, expiracao } = JSON.parse(guardado);
+    // Se passaram mais de 24h, limpa
+    if (Date.now() > expiracao) {
+      localStorage.removeItem('eliminacao_etapa');
+      return 'idle';
+    }
+    return etapa;
+  });
+  const guardarEtapa = (etapa) => {
+  if (etapa === 'idle') {
+    localStorage.removeItem('eliminacao_etapa');
+  } else {
+    localStorage.setItem('eliminacao_etapa', JSON.stringify({
+      etapa,
+      expiracao: Date.now() + 24 * 60 * 60 * 1000 // 24h
+    }));
+  }
+  setEtapaEliminacao(etapa);
+};
   const [enviando, setEnviando] = useState(false);
   const [eliminando, setEliminando] = useState(false);
 
@@ -31,12 +52,13 @@ const Perfil = () => {
   const novaSenha = watch('novaSenha');
   const motivoTexto = watchMotivo('motivo') || '';
 
-  const limparEstado = () => { setErro(''); setMensagem(''); setEtapaEliminacao('idle'); };
+  const limparEstado = () => { setErro(''); setMensagem(''); guardarEtapa('idle'); };
 
   const onSubmitInfo = async (data) => {
     try {
       setErro('');
       await api.put('/usuarios/perfil', data);
+      await refreshUser();
       setMensagem('Dados actualizados com sucesso!');
       setTimeout(() => setMensagem(''), 3000);
     } catch (err) {
@@ -61,7 +83,7 @@ const Perfil = () => {
       setErro('');
       setEnviando(true);
       await api.post('/eliminacao/pedido', { motivo: data.motivo });
-      setEtapaEliminacao('aguardar');
+      guardarEtapa('aguardar');
     } catch (err) {
       setErro(err.response?.data?.error || 'Erro ao enviar pedido. Tente novamente.');
     } finally {
@@ -125,16 +147,15 @@ const Perfil = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="flex border-b border-gray-100">
           {[
-            { id: 'info',  label: 'Informações', icon: FiUser },
-            { id: 'senha', label: 'Senha',        icon: FiLock },
-            { id: 'conta', label: 'Conta',        icon: FiShield },
+            { id: 'info', label: 'Informações', icon: FiUser },
+            { id: 'senha', label: 'Senha', icon: FiLock },
+            { id: 'conta', label: 'Conta', icon: FiShield },
           ].map(tab => (
             <button key={tab.id} onClick={() => { setAbaActiva(tab.id); limparEstado(); }}
-              className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-wide transition-colors border-b-2 ${
-                abaActiva === tab.id
+              className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-wide transition-colors border-b-2 ${abaActiva === tab.id
                   ? tab.id === 'conta' ? 'border-rose-500 text-rose-600 bg-rose-50/50' : 'border-brand-500 text-brand-600 bg-brand-50/50'
                   : 'border-transparent text-gray-400 hover:text-gray-600'
-              }`} aria-selected={abaActiva === tab.id} role="tab">
+                }`} aria-selected={abaActiva === tab.id} role="tab">
               <tab.icon size={14} aria-hidden="true" />{tab.label}
             </button>
           ))}
@@ -238,11 +259,11 @@ const Perfil = () => {
                       📧 Verifique a sua caixa de entrada e pasta de spam. O código tem validade de <strong>24 horas</strong>.
                     </p>
                   </div>
-                  <button onClick={() => setEtapaEliminacao('codigo')}
+                  <button onClick={() => guardarEtapa('codigo')}
                     className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm transition-colors">
                     <FiKey size={16} /> Já tenho o código
                   </button>
-                  <button onClick={() => { setEtapaEliminacao('idle'); setErro(''); }}
+                  <button onClick={() => { guardarEtapa('idle'); setErro(''); }}
                     className="w-full py-2.5 text-gray-400 text-sm hover:text-gray-600 transition-colors">Cancelar pedido</button>
                 </div>
               )}

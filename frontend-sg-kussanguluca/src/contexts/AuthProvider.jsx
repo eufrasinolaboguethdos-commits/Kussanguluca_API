@@ -11,53 +11,53 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const initAuth = () => {
-    const token = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
-    const savedCompany = localStorage.getItem("activeCompany");
-    const clearStorage = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-};
+    const initAuth = () => {
+      const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user");
+      const savedCompany = localStorage.getItem("activeCompany");
+      const clearStorage = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setUser(null);
+      };
 
 
-    if (!token || !savedUser) {
-      clearStorage();
-      setLoading(false);
-      return;
-    }
-
-    try {
-
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
-
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      if (savedCompany) {
-
-        const parsedCompany = JSON.parse(savedCompany);
-
-        if (parsedCompany && parsedCompany.id_empresa) {
-          setActiveCompanyState(parsedCompany);
-          axios.defaults.headers.common["X-Company-ID"] = parsedCompany.id_empresa;
-        } else {
-          localStorage.removeItem("activeCompany");
-        }
-
+      if (!token || !savedUser) {
+        clearStorage();
+        setLoading(false);
+        return;
       }
 
-    } catch (error) {
+      try {
 
-      console.error("Erro ao restaurar sessão:", error);
-      clearStorage();
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
 
-    } finally {
-      setLoading(false);
-    } 
-  };
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        if (savedCompany) {
+
+          const parsedCompany = JSON.parse(savedCompany);
+
+          if (parsedCompany && parsedCompany.id_empresa) {
+            setActiveCompanyState(parsedCompany);
+            axios.defaults.headers.common["X-Company-ID"] = parsedCompany.id_empresa;
+          } else {
+            localStorage.removeItem("activeCompany");
+          }
+
+        }
+
+      } catch (error) {
+
+        console.error("Erro ao restaurar sessão:", error);
+        clearStorage();
+
+      } finally {
+        setLoading(false);
+      }
+    };
     initAuth();
 
   }, []);
@@ -118,8 +118,17 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("activeCompanyId"); // ✅ limpa o do useCompanyId também
     delete axios.defaults.headers.common["Authorization"];
     delete axios.defaults.headers.common["X-Company-ID"];
-};
-
+  };
+  const refreshUser = async () => {
+      try {
+        const { data } = await api.get('/usuarios/perfil');
+        const updatedUser = { ...user, ...data };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } catch (err) {
+        console.error('Erro ao actualizar dados do utilizador:', err);
+      }
+    };
   const logout = () => {
 
     clearStorage();
@@ -132,8 +141,9 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user, setUser, activeCompany, setActiveCompany,
     signIn, logout, signOut: logout, // ✅ alias para o Navbar funcionar
+    refreshUser,
     loading, isAuthenticated: !!user
-};
+  };
 
   return (
     <AuthContext.Provider value={value}>
