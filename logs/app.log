@@ -7332,3 +7332,8 @@
 [2026-03-30 21:24:54] info: GET /metas/actual?id_empresa=1 304 18.531 ms
 [2026-03-30 21:24:54] info: GET /fluxo?id_empresa=1 304 11.608 ms
 [2026-03-30 21:24:55] info: GET /contas/resumo?id_empresa=1 304 4.583 ms
+[2026-03-30 21:25:46] info: GET /contas?id_empresa=1&estado=pendente 304 7.253 ms
+[2026-03-30 21:25:46] info: GET /saude?id_empresa=1 304 36.336 ms
+[2026-03-30 21:25:46] info: GET /metas/actual?id_empresa=1 304 4.617 ms
+[2026-03-30 21:25:46] info: GET /fluxo?id_empresa=1 304 4.714 ms
+[2026-03-30 21:25:46] info: GET /contas/resumo?id_empresa=1 304 2.529 ms
