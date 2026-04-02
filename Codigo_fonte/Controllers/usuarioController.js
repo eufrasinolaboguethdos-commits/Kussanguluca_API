@@ -15,7 +15,7 @@ export async function registrarUsuario(req, res) {
 }
 
 export async function loginUsuario(req, res) {
-   console.log("BODY:", req.body);
+  console.log("BODY:", req.body);
   try {
     const { email, senha } = req.body;
 
@@ -32,7 +32,11 @@ export async function loginUsuario(req, res) {
       console.log('Usuário não encontrado:', email);
       return res.status(401).json({ error: 'Usuário não encontrado' });
     }
-
+    if (usuario.apagado === 1) {
+      return res.status(401).json({
+        error: 'Esta conta foi eliminada. Contacte o suporte se acredita que foi um erro.'
+      });
+    }
     // Verificar a senha comparando com o hash no banco
     const senhaValida = await bcrypt.compare(senha, usuario.senha);
     if (!senhaValida) {
