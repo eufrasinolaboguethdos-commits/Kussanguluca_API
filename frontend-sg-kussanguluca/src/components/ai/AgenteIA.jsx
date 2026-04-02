@@ -311,7 +311,7 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
                 { icon: FiTrendingUp, label: 'Finanças' },
                 { icon: FiGlobe, label: 'Angola' },
                 { icon: FiShield, label: 'Auditoria' },
-              ].map(({ icon: IconComp, label }) => (
+              ].map(({ icon: label }) => (
                 <div key={label} className="flex items-center gap-1 text-[10px] text-brand-600 dark:text-brand-400 font-semibold">
                   <IconComp size={11} /> {label}
                 </div>
