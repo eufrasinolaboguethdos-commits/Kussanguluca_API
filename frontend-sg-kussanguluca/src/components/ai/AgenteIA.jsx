@@ -6,41 +6,40 @@ import {
 } from 'react-icons/fi';
 
 // ── System Prompt ─────────────────────────────────────────
-const SYSTEM_PROMPT = `És o assistente financeiro inteligente da plataforma SG Kussanguluca — um sistema de gestão financeira para micro e pequenas empresas angolanas.
+const SYSTEM_PROMPT = `És o Kuss — assistente financeiro inteligente da plataforma SG Kussanguluca.
 
-IDENTIDADE:
-- Nome: Kuss (abreviação de Kussanguluca)
-- Personalidade: profissional mas acessível, directo, usa linguagem portuguesa de Angola quando adequado
-- Especialidade: gestão financeira, contabilidade básica, fiscalidade angolana, análise de negócios
+QUEM ÉS:
+Não és um chatbot. És um consultor financeiro digital com personalidade real — directo, inteligente, empático e com sentido de humor quando o momento pede. Falas como um amigo muito bem informado, não como um manual.
 
-CAPACIDADES:
-1. Conversa natural (cumprimentos, perguntas gerais, motivação)
-2. Análise financeira completa (liquidez, cashflow, margens, ROI)
-3. Conselhos sobre gestão de MPMEs em Angola
-4. Fiscalidade angolana (IVA, IRE, OGE, incentivos fiscais)
-5. Auditoria financeira básica (identificar riscos, inconsistências)
-6. Ideias de negócio e estratégias de crescimento
-7. Interpretação de dados financeiros em linguagem simples
-8. Alertas e recomendações personalizadas
+COMO COMUNICAS:
+- Fala de forma natural, como se estivesses numa conversa real
+- Vai directo ao ponto — sem introduções longas nem "Claro! Com certeza!"
+- Usa exemplos concretos e números reais quando possível
+- Antecipa o que o utilizador precisa mesmo antes de ele perguntar
+- Se vires um problema nos dados, diz — não esperes que perguntem
+- Termina com uma pergunta ou sugestão que leve a conversa para a frente
+- Usa emojis com moderação e só quando fazem sentido
+
+ESPECIALIDADES:
+- Análise financeira profunda (liquidez, margens, ROI, cashflow)
+- Estratégia de negócios para MPMEs angolanas
+- Fiscalidade angolana — IVA 14%, IRE, AGT, OGE
+- Identificação de oportunidades e riscos financeiros
+- Geração de ideias inovadoras adaptadas ao mercado angolano
+- Pensamento estratégico — cenários, tendências, decisões
 
 CONTEXTO ANGOLA:
-- Moeda: Kwanza (AOA/Kz)
-- Mercado volátil com risco cambial USD/EUR
-- Informalidade económica frequente
-- Sectores principais: petróleo, comércio, serviços, agricultura
-- Órgão fiscal: AGT (Administração Geral Tributária)
-- Banco central: BNA (Banco Nacional de Angola)
-- Taxa IVA padrão: 14%
-- IRE: Imposto sobre Rendimento Empresarial
+- Moeda: Kwanza (AOA/Kz) — mercado volátil com risco cambial
+- Economia informal significativa — adapta os conselhos a essa realidade
+- BNA define política monetária, AGT é o fisco
+- Sectores em crescimento: tecnologia, agro, logística, serviços
 
-REGRAS DE RESPOSTA:
-- Sê conciso mas completo
-- Usa bullet points quando listares items
-- Usa números e exemplos concretos quando possível
-- Se não souberes algo, diz claramente e sugere onde encontrar
-- Nunca inventes dados financeiros — baseia-te nos dados fornecidos
-- Quando deres conselhos financeiros, avisa que são orientações gerais
-- Responde SEMPRE em português
+REGRAS DE OURO:
+1. Nunca inventes números — usa só os dados fornecidos
+2. Quando deres conselhos financeiros, diz que são orientações gerais
+3. Se não souberes algo, diz claramente — mas sugere onde encontrar
+4. Responde SEMPRE em português
+5. Sê honesto mesmo quando a notícia não é boa
 
 DADOS DA SESSÃO:
 {{CONTEXT_DATA}}`;
@@ -54,20 +53,20 @@ async function callClaude(messages, contextData = {}) {
       : 'Nenhum dado financeiro disponível nesta sessão.'
   );
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const token = localStorage.getItem('token');
+
+  const response = await fetch('http://localhost:3000/kuss/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: systemWithContext,
-      messages,
-    }),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ messages, contextData: systemWithContext }),
   });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${response.status}`);
+    throw new Error(err.error || `HTTP ${response.status}`);
   }
 
   const data = await response.json();
@@ -137,22 +136,51 @@ function formatMessage(text) {
   if (!text) return null;
   const lines = text.split('\n');
   return lines.map((line, i) => {
-    if (line.startsWith('**') && line.endsWith('**')) {
-      return <p key={i} className="font-bold text-gray-900 dark:text-white">{line.slice(2, -2)}</p>;
+    // Títulos ## e ###
+    if (line.startsWith('### ')) {
+      return <p key={i} className="font-bold text-gray-900 dark:text-white text-sm mt-2 mb-1">{line.slice(4)}</p>;
     }
+    if (line.startsWith('## ')) {
+      return <p key={i} className="font-bold text-brand-600 dark:text-brand-400 text-sm mt-2 mb-1 uppercase tracking-wide">{line.slice(3)}</p>;
+    }
+    // Bullet points
     if (line.startsWith('- ') || line.startsWith('• ')) {
       return (
-        <div key={i} className="flex items-start gap-1.5 my-0.5">
-          <span className="text-brand-500 mt-1 flex-shrink-0">•</span>
-          <span>{line.slice(2)}</span>
+        <div key={i} className="flex items-start gap-1.5 my-0.5 ml-1">
+          <span className="text-brand-500 mt-1 flex-shrink-0 text-xs">●</span>
+          <span>{processInline(line.slice(2))}</span>
         </div>
       );
     }
+    // Listas numeradas
     if (line.match(/^\d+\./)) {
-      return <p key={i} className="my-0.5 font-medium">{line}</p>;
+      const num = line.match(/^(\d+)\./)[1];
+      return (
+        <div key={i} className="flex items-start gap-2 my-0.5 ml-1">
+          <span className="text-brand-500 font-bold text-xs flex-shrink-0 mt-0.5 w-4">{num}.</span>
+          <span>{processInline(line.replace(/^\d+\./, '').trim())}</span>
+        </div>
+      );
     }
-    if (line === '') return <div key={i} className="h-1" />;
-    return <p key={i} className="my-0.5">{line}</p>;
+    // Linha vazia
+    if (line.trim() === '') return <div key={i} className="h-1" />;
+    // Linha normal com bold inline
+    return <p key={i} className="my-0.5 leading-relaxed">{processInline(line)}</p>;
+  });
+}
+
+// Processa **bold** e *italic* dentro de uma linha
+function processInline(text) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-semibold text-gray-900 dark:text-white">{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i} className="italic text-gray-600 dark:text-gray-300">{part.slice(1, -1)}</em>;
+    }
+    return part;
   });
 }
 
@@ -240,18 +268,20 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
   };
 
   const abrir = () => {
-    setAberto(true);
-    if (displayMsgs.length === 0) {
-      // Mensagem de boas-vindas automática
-      const nome = empresa?.nome || 'empreendedor';
-      setDisplayMsgs([{
-        role: 'assistant',
-        content: `Olá! 👋 Sou o **Kuss**, o teu assistente financeiro inteligente.\n\nEstou aqui para ajudar com análise financeira, conselhos de gestão, fiscalidade angolana e muito mais.\n\nComo posso ajudar${nome !== 'empreendedor' ? ` a ${nome}` : ''} hoje?`,
-        ts: Date.now(),
-        sugestoes: SUGESTOES_INICIAIS,
-      }]);
-    }
-  };
+  setAberto(true);
+  if (displayMsgs.length === 0) {
+    const hora = new Date().getHours();
+    const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+    const nome = empresa?.nome || null;
+
+    setDisplayMsgs([{
+      role: 'assistant',
+      content: `${saudacao}! 👋 Sou o Kuss, o teu consultor financeiro digital.\n\n${nome ? `Estou a ver que estás a gerir a **${nome}** — já tenho os dados carregados e prontos para analisar.\n\n` : ''}Como estás hoje? Tudo bem com o negócio, ou há algo que te está a preocupar? Pode ser qualquer coisa — números, estratégia, uma dúvida fiscal, o que quiseres. 😊`,
+      ts: Date.now(),
+      sugestoes: SUGESTOES_INICIAIS,
+    }]);
+  }
+};
 
   const limpar = () => {
     setMessages([]);
@@ -311,7 +341,7 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
                 { icon: FiTrendingUp, label: 'Finanças' },
                 { icon: FiGlobe, label: 'Angola' },
                 { icon: FiShield, label: 'Auditoria' },
-              ].map(({ icon: label }) => (
+              ].map(({ icon: IconComp,label }) => (
                 <div key={label} className="flex items-center gap-1 text-[10px] text-brand-600 dark:text-brand-400 font-semibold">
                   <IconComp size={11} /> {label}
                 </div>

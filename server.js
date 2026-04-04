@@ -15,9 +15,8 @@ import metaRoutes   from './Codigo_fonte/Routes/metaRoutes.js';
 import fluxoRoutes  from './Codigo_fonte/Routes/fluxoRoutes.js';
 import taxaRoutes from './Codigo_fonte/Routes/taxaRoutes.js';
 import eliminacaoRoutes from './Codigo_fonte/Routes/eliminacaoRoutes.js';
+import kussRoutes from './Codigo_fonte/Routes/kussRoutes.js';
 
-
- 
 
 dotenv.config();
 const app = express();
@@ -50,6 +49,7 @@ app.use('/metas',   metaRoutes);
 app.use('/fluxo',   fluxoRoutes);
 app.use('/taxa-cambio', taxaRoutes);
 app.use('/eliminacao', eliminacaoRoutes);
+app.use('/kuss', kussRoutes);
 
 
 app.get('/', (req, res) => {
