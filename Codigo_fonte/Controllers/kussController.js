@@ -135,6 +135,7 @@ async function guardarRelatorio(id_empresa, id_usuario, tipo, titulo, conteudo, 
         JSON.stringify(fontesUsadas || [])
       ]
     );
+    return result.insertId;
   } catch (err) {
     console.error('[Kuss] Erro ao guardar relatório:', err);
   }
@@ -226,6 +227,7 @@ export async function kussChat(req, res) {
       content: [{ type: 'text', text: resposta }],
       fontes_usadas: chunks.length,
       rag_activo: chunks.length > 0,
+      id_relatorio: idRelatorioGerado || null,
     });
 
   } catch (err) {

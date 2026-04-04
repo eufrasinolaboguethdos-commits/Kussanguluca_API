@@ -46,12 +46,6 @@ DADOS DA SESSÃO:
 
 // ── Anthropic API Call ────────────────────────────────────
 async function callClaude(messages, contextData = {}) {
-  const systemWithContext = SYSTEM_PROMPT.replace(
-    '{{CONTEXT_DATA}}',
-    contextData && Object.keys(contextData).length > 0
-      ? JSON.stringify(contextData, null, 2)
-      : 'Nenhum dado financeiro disponível nesta sessão.'
-  );
 
   const token = localStorage.getItem('token');
 
@@ -61,7 +55,7 @@ async function callClaude(messages, contextData = {}) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ messages, contextData: systemWithContext }),
+    body: JSON.stringify({ messages, contextData }),
   });
 
   if (!response.ok) {
@@ -70,7 +64,10 @@ async function callClaude(messages, contextData = {}) {
   }
 
   const data = await response.json();
-  return data.content?.find(b => b.type === 'text')?.text || 'Sem resposta.';
+  return {
+    texto: data.content?.find(b => b.type === 'text')?.text || 'Sem resposta.',
+    idRelatorio: data.id_relatorio || null,  // backend precisa retornar isto
+  };
 }
 
 // ── Sugestões contextuais ─────────────────────────────────
@@ -105,7 +102,7 @@ const MsgBubble = ({ msg, onSugestao }) => {
       <div className={`max-w-[85%] ${isUser
         ? 'bg-brand-500 text-white rounded-2xl rounded-br-none px-3 py-2'
         : 'bg-white dark:bg-slate-700 border border-gray-100 dark:border-slate-600 rounded-2xl rounded-bl-none px-3 py-2 shadow-sm'
-      }`}>
+        }`}>
         {isUser ? (
           <p className="text-sm">{msg.content}</p>
         ) : (
@@ -123,11 +120,32 @@ const MsgBubble = ({ msg, onSugestao }) => {
             ))}
           </div>
         )}
+        {msg.idRelatorio && (
+          <div className="mt-3 flex gap-2">
+            <a
+              href={`/kuss/relatorios/${msg.idRelatorio}/pdf`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-[11px] bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 px-3 py-1.5 rounded-lg hover:bg-rose-100 transition-colors font-medium"
+            >
+              📄 Baixar PDF
+            </a>
+            <a
+              href={`http://localhost:3000/kuss/relatorios/${msg.idRelatorio}/excel`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-[11px] bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+            >
+              📊 Baixar Excel
+            </a>
+          </div>
+        )
+        }
         <p className="text-[9px] opacity-40 mt-1 text-right">
           {new Date(msg.ts).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}
         </p>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 
@@ -238,16 +256,17 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
       const resposta = await callClaude(newMessages, contextData);
 
       // Mensagens Anthropic (histórico)
-      setMessages(prev => [...prev, { role: 'assistant', content: resposta }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: resposta.texto }]);
 
       // Sugestões dinâmicas baseadas na resposta
-      const sugestoes = gerarSugestoes(resposta, texto);
+      const sugestoes = gerarSugestoes(resposta.texto, texto);
 
       setDisplayMsgs(prev => [...prev, {
         role: 'assistant',
-        content: resposta,
+        content: resposta.texto,
         ts: Date.now(),
         sugestoes,
+        idRelatorio: resposta.idRelatorio,
       }]);
     } catch (err) {
       setErro(err.message);
@@ -268,20 +287,20 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
   };
 
   const abrir = () => {
-  setAberto(true);
-  if (displayMsgs.length === 0) {
-    const hora = new Date().getHours();
-    const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
-    const nome = empresa?.nome || null;
+    setAberto(true);
+    if (displayMsgs.length === 0) {
+      const hora = new Date().getHours();
+      const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+      const nome = empresa?.nome || null;
 
-    setDisplayMsgs([{
-      role: 'assistant',
-      content: `${saudacao}! 👋 Sou o Kuss, o teu consultor financeiro digital.\n\n${nome ? `Estou a ver que estás a gerir a **${nome}** — já tenho os dados carregados e prontos para analisar.\n\n` : ''}Como estás hoje? Tudo bem com o negócio, ou há algo que te está a preocupar? Pode ser qualquer coisa — números, estratégia, uma dúvida fiscal, o que quiseres. 😊`,
-      ts: Date.now(),
-      sugestoes: SUGESTOES_INICIAIS,
-    }]);
-  }
-};
+      setDisplayMsgs([{
+        role: 'assistant',
+        content: `${saudacao}! 👋 Sou o Kuss, o teu consultor financeiro digital.\n\n${nome ? `Estou a ver que estás a gerir a **${nome}** — já tenho os dados carregados e prontos para analisar.\n\n` : ''}Como estás hoje? Tudo bem com o negócio, ou há algo que te está a preocupar? Pode ser qualquer coisa — números, estratégia, uma dúvida fiscal, o que quiseres. 😊`,
+        ts: Date.now(),
+        sugestoes: SUGESTOES_INICIAIS,
+      }]);
+    }
+  };
 
   const limpar = () => {
     setMessages([]);
@@ -341,7 +360,7 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
                 { icon: FiTrendingUp, label: 'Finanças' },
                 { icon: FiGlobe, label: 'Angola' },
                 { icon: FiShield, label: 'Auditoria' },
-              ].map(({ icon: IconComp,label }) => (
+              ].map(({ icon: IconComp, label }) => (
                 <div key={label} className="flex items-center gap-1 text-[10px] text-brand-600 dark:text-brand-400 font-semibold">
                   <IconComp size={11} /> {label}
                 </div>
