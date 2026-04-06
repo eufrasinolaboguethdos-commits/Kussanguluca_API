@@ -89,7 +89,7 @@ const TypingDots = () => (
   </div>
 );
 
-const MsgBubble = ({ msg, onSugestao }) => {
+const MsgBubble = ({ msg, onSugestao, onDownload }) => {
   const isUser = msg.role === 'user';
 
   return (
@@ -122,25 +122,20 @@ const MsgBubble = ({ msg, onSugestao }) => {
         )}
         {msg.idRelatorio && (
           <div className="mt-3 flex gap-2">
-            <a
-              href={`/kuss/relatorios/${msg.idRelatorio}/pdf`}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              onClick={() => onDownload(msg.idRelatorio, 'pdf')}
               className="flex items-center gap-1.5 text-[11px] bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 px-3 py-1.5 rounded-lg hover:bg-rose-100 transition-colors font-medium"
             >
               📄 Baixar PDF
-            </a>
-            <a
-              href={`http://localhost:3000/kuss/relatorios/${msg.idRelatorio}/excel`}
-              target="_blank"
-              rel="noreferrer"
+            </button>
+            <button
+              onClick={() => onDownload(msg.idRelatorio, 'excel')}
               className="flex items-center gap-1.5 text-[11px] bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
             >
               📊 Baixar Excel
-            </a>
+            </button>
           </div>
-        )
-        }
+        )}
         <p className="text-[9px] opacity-40 mt-1 text-right">
           {new Date(msg.ts).toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit' })}
         </p>
@@ -226,6 +221,7 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
   // Contexto financeiro para o assistente
   const contextData = {
     empresa: empresa ? {
+      id: empresa.id_empresa || empresa.id,
       nome: empresa.nome,
       setor: empresa.setor,
       nif: empresa.NIF,
@@ -308,6 +304,31 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
     setErro(null);
   };
 
+  const downloadRelatorio = async (id, tipo) => {
+    const token = localStorage.getItem('token');
+    console.log('Token:', token ? 'existe' : 'NULL');
+    const ext = tipo === 'pdf' ? 'pdf' : 'xlsx';
+    try {
+      const res = await fetch(`http://localhost:3000/kuss/relatorios/${id}/${tipo}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+
+      });
+      if (!res.ok) throw new Error('Erro ao descarregar');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `relatorio-${id}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Erro ao descarregar: ' + err.message);
+    }
+  };
+
+
+
   return (
     <>
       {/* Botão flutuante */}
@@ -371,7 +392,7 @@ const AgenteIA = ({ empresa, dadosFinanceiros, stats }) => {
           {/* Mensagens */}
           <div className="flex-1 overflow-y-auto p-3 bg-gray-50 dark:bg-slate-900/30">
             {displayMsgs.map((msg, i) => (
-              <MsgBubble key={i} msg={msg} onSugestao={enviar} />
+              <MsgBubble key={i} msg={msg} onSugestao={enviar} onDownload={downloadRelatorio} />
             ))}
             {loading && (
               <div className="flex justify-start mb-3">
