@@ -1,5 +1,6 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
 import cors from 'cors';
 import usuarioRoutes from './Codigo_fonte/Routes/usuarioRoutes.js';
 import empresaRoutes from './Codigo_fonte/Routes/empresaRoutes.js';
@@ -18,7 +19,7 @@ import eliminacaoRoutes from './Codigo_fonte/Routes/eliminacaoRoutes.js';
 import kussRoutes from './Codigo_fonte/Routes/kussRoutes.js';
 
 
-dotenv.config();
+
 const app = express();
 
 // No topo do ficheiro
