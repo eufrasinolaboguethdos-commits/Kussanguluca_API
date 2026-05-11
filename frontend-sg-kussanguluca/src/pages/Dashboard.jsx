@@ -27,6 +27,7 @@ const formatarValor = (valor) =>
   new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(toNumber(valor));
 const formatarData = (dataString) => new Date(dataString).toLocaleDateString('pt-PT');
 
+
 function ultimosMeses(n = 6) {
   const out = [];
   const base = new Date();

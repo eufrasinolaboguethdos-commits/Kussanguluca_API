@@ -4,7 +4,7 @@ import Sidebar from '../components/ui/layout/Sidebar.jsx';
 import Navbar from '../components/ui/layout/Navbar.jsx';
 import BotaoAjuda from '../components/ui/BotaoAjuda';
 import AgenteIA from '../components/ai/AgenteIA';
-import { useAuth } from '../hooks/useAuth';
+//import { useAuth } from '../hooks/useAuth';
 import { useCompanyId } from '../hooks/useCompanyId';
 import { receitaService } from '../services/receitaService';
 import { despesaService } from '../services/despesaService';
@@ -13,7 +13,7 @@ const AppLayout = () => {
   const [sidebarAberto, setSidebarAberto] = useState(false);
   const location = useLocation();
   const { activeCompany, companyId, loadingCompany } = useCompanyId();
-  const { user } = useAuth();
+  //const { user } = useAuth();
 
   const [statsIA, setStatsIA] = useState(null);
 
