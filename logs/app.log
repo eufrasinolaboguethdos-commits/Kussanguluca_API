@@ -11129,3 +11129,15 @@
 [2026-05-11 16:07:20] info: GET /contas/resumo?id_empresa=18 304 2.783 ms
 [2026-05-11 16:07:20] info: GET /contas/resumo?id_empresa=18 304 2.020 ms
 [2026-05-11 16:07:23] info: GET /exportar/excel?id_empresa=18&dataInicio=2026-05-01&dataFim=2026-05-31 200 1520.978 ms
+[2026-05-11 16:08:00] info: GET /empresas 304 2.993 ms
+[2026-05-11 16:08:00] info: GET /contas?id_empresa=18&estado=pendente 304 6.906 ms
+[2026-05-11 16:08:00] info: GET /empresas 304 3.401 ms
+[2026-05-11 16:08:00] info: GET /receitas?id_empresa=18 304 12.892 ms
+[2026-05-11 16:08:00] info: GET /saude?id_empresa=18 304 19.123 ms
+[2026-05-11 16:08:00] info: GET /despesas?id_empresa=18 304 11.790 ms
+[2026-05-11 16:08:00] info: GET /contas/resumo?id_empresa=18 304 17.555 ms
+[2026-05-11 16:08:00] info: GET /metas/actual?id_empresa=18 304 23.043 ms
+[2026-05-11 16:08:00] info: GET /saude?id_empresa=18 304 14.425 ms
+[2026-05-11 16:08:00] info: GET /metas/actual?id_empresa=18 304 3.254 ms
+[2026-05-11 16:08:00] info: GET /fluxo?id_empresa=18 304 4.774 ms
+[2026-05-11 16:08:00] info: GET /contas/resumo?id_empresa=18 304 2.710 ms
