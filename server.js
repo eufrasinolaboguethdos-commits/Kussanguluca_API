@@ -27,7 +27,7 @@ const app = express();
 
 // Depois de criar o app
 app.use(cors({
-  origin: ['http://localhost:5173','https://kussanguluca-api.vercel.app'], // URL do teu frontend
+  origin: ['http://localhost:5173', 'https://frontend-sg-kussanguluca.vercel.app'], // URL do teu frontend
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -59,6 +59,11 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(3000, () => console.log('Servidor local na porta 3000'));
+}
 app.listen(PORT, () =>{
     console.log(`Servidor está a rodar na porta ${PORT}`);
 });
+
+export default app;
