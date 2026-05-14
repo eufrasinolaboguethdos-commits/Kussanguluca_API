@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/ui/layout/Sidebar.jsx';
 import Navbar from '../components/ui/layout/Navbar.jsx';
@@ -17,45 +17,59 @@ const AppLayout = () => {
 
   const [statsIA, setStatsIA] = useState(null);
 
-  // Carrega dados financeiros básicos para o Kuss
+  const fecharSidebar = useCallback(() => setSidebarAberto(false), []);
+  const abrirSidebar  = useCallback(() => setSidebarAberto(true),  []);
+
   useEffect(() => {
     if (!companyId || loadingCompany) return;
+
+    let cancelled = false;
+
     async function carregarParaIA() {
       try {
         const [receitas, despesas] = await Promise.all([
           receitaService.getAll(companyId),
           despesaService.getAll(companyId),
         ]);
-        const totalReceitas = (receitas || []).reduce((s, r) => s + Number(r.valor || 0), 0);
-        const totalDespesas = (despesas || []).reduce((s, d) => s + Number(d.valor || 0), 0);
+
+        if (cancelled) return;
+
+        const totalReceitas = (receitas ?? []).reduce((s, r) => s + Number(r.valor ?? 0), 0);
+        const totalDespesas = (despesas ?? []).reduce((s, d) => s + Number(d.valor ?? 0), 0);
+
         setStatsIA({
           totalReceitas,
           totalDespesas,
           saldo: totalReceitas - totalDespesas,
         });
-      } catch { /* silencioso */ }
+      } catch {
+        /* silencioso */
+      }
     }
+
     carregarParaIA();
+    return () => { cancelled = true; };
   }, [companyId, loadingCompany]);
 
   return (
-    <div className="flex bg-gray-100 min-h-screen">
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Overlay para mobile */}
       {sidebarAberto && (
         <div
-          className="fixed inset-0 bg-black/40 z-10 lg:hidden backdrop-blur-sm"
-          onClick={() => setSidebarAberto(false)}
+          className="fixed inset-0 z-10 bg-black/40 backdrop-blur-sm lg:hidden"
+          onClick={fecharSidebar}
           aria-hidden="true"
         />
       )}
 
-      <Sidebar aberto={sidebarAberto} fechar={() => setSidebarAberto(false)} />
+      <Sidebar aberto={sidebarAberto} fechar={fecharSidebar} />
 
-      <div className="flex-1 flex flex-col lg:ml-64 transition-all duration-300">
-        <Navbar abrirSidebar={() => setSidebarAberto(true)} />
+      <div className="flex flex-1 flex-col transition-all duration-300 lg:ml-64">
+        <Navbar abrirSidebar={abrirSidebar} />
 
         <main
           id="main-content"
-          className="flex-1 p-2 sm:p-3 md:p-6 mt-16 overflow-auto"
+          className="mt-16 flex-1 overflow-auto p-2 sm:p-3 md:p-6"
           role="main"
           aria-label="Conteúdo principal"
         >
@@ -66,11 +80,7 @@ const AppLayout = () => {
 
         <BotaoAjuda />
 
-        {/* ← Agora passa os dados correctamente */}
-        <AgenteIA
-          empresa={activeCompany}
-          stats={statsIA}
-        />
+        <AgenteIA empresa={activeCompany} stats={statsIA} />
       </div>
     </div>
   );
