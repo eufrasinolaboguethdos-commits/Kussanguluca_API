@@ -27,7 +27,7 @@ const app = express();
 
 // Depois de criar o app
 app.use(cors({
-  origin: 'http://localhost:5173', // URL do teu frontend
+  origin: ['http://localhost:5173','https://kussanguluca-api.vercel.app'], // URL do teu frontend
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Criar instância do axios com configuração base
 export const api = axios.create({
-  baseURL: 'http://localhost:3000', // URL do teu backend
+  baseURL: import.meta.env.VITE_API_URL || 'https://kussangulucaapi-production.up.railway.app',// URL do teu backend
   timeout: 10000, // 10 segundos de timeout
   headers: {
     'Content-Type': 'application/json',
