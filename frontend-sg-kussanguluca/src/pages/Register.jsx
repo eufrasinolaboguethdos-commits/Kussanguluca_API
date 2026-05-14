@@ -24,27 +24,27 @@ const Register = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     setRegisterError('');
-    
+
     try {
       const { ...userData } = data;
-      
+
       // Apenas dados do utilizador - sem empresa!
       await authService.register({
         nome: userData.nome,
         email: userData.email,
         senha: userData.password
       });
-      
+
       setRegisterSuccess(true);
-      
+
       setTimeout(() => {
         navigate('/login');
       }, 2000);
-      
+
     } catch (error) {
       console.error('Erro no registo:', error);
       setRegisterError(
-        error.response?.data?.message || 
+        error.response?.data?.message ||
         'Erro ao criar conta. Tente novamente.'
       );
     } finally {
@@ -103,7 +103,7 @@ const Register = () => {
 
       {/* ✅ Form original - validações e register preservados */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 animate-fade-in-up relative z-10">
-        
+
         {/* Input Nome com ícone */}
         <div className="relative group">
           <label className="block text-sm font-semibold text-gray-700 mb-2 ml-1">Nome Completo</label>
@@ -119,11 +119,10 @@ const Register = () => {
                 required: 'O nome é obrigatório',
                 minLength: { value: 3, message: 'Mínimo de 3 caracteres' }
               })}
-              className={`w-full pl-12 pr-4 py-3.5 bg-white border-2 rounded-xl text-gray-800 placeholder-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/20 hover:border-brand-300 ${
-                errors.nome 
-                  ? 'border-red-300 focus:border-red-500 animate-shake' 
+              className={`w-full pl-12 pr-4 py-3.5 bg-white border-2 rounded-xl text-gray-800 placeholder-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/20 hover:border-brand-300 ${errors.nome
+                  ? 'border-red-300 focus:border-red-500 animate-shake'
                   : 'border-gray-200 focus:border-brand-500'
-              }`}
+                }`}
             />
           </div>
           {errors.nome && (
@@ -152,11 +151,10 @@ const Register = () => {
                   message: 'Endereço de email inválido'
                 }
               })}
-              className={`w-full pl-12 pr-4 py-3.5 bg-white border-2 rounded-xl text-gray-800 placeholder-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/20 hover:border-brand-300 ${
-                errors.email 
-                  ? 'border-red-300 focus:border-red-500 animate-shake' 
+              className={`w-full pl-12 pr-4 py-3.5 bg-white border-2 rounded-xl text-gray-800 placeholder-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/20 hover:border-brand-300 ${errors.email
+                  ? 'border-red-300 focus:border-red-500 animate-shake'
                   : 'border-gray-200 focus:border-brand-500'
-              }`}
+                }`}
             />
           </div>
           {errors.email && (
@@ -182,11 +180,10 @@ const Register = () => {
                 required: 'A palavra-passe é obrigatória',
                 minLength: { value: 6, message: 'Mínimo de 6 caracteres' }
               })}
-              className={`w-full pl-12 pr-12 py-3.5 bg-white border-2 rounded-xl text-gray-800 placeholder-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/20 hover:border-brand-300 ${
-                errors.password 
-                  ? 'border-red-300 focus:border-red-500 animate-shake' 
+              className={`w-full pl-12 pr-12 py-3.5 bg-white border-2 rounded-xl text-gray-800 placeholder-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/20 hover:border-brand-300 ${errors.password
+                  ? 'border-red-300 focus:border-red-500 animate-shake'
                   : 'border-gray-200 focus:border-brand-500'
-              }`}
+                }`}
             />
             <button
               type="button"
@@ -219,11 +216,10 @@ const Register = () => {
                 required: 'Confirme a palavra-passe',
                 validate: value => value === password || 'As palavras-passe não coincidem'
               })}
-              className={`w-full pl-12 pr-12 py-3.5 bg-white border-2 rounded-xl text-gray-800 placeholder-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/20 hover:border-brand-300 ${
-                errors.confirmPassword 
-                  ? 'border-red-300 focus:border-red-500 animate-shake' 
+              className={`w-full pl-12 pr-12 py-3.5 bg-white border-2 rounded-xl text-gray-800 placeholder-gray-400 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/20 hover:border-brand-300 ${errors.confirmPassword
+                  ? 'border-red-300 focus:border-red-500 animate-shake'
                   : 'border-gray-200 focus:border-brand-500'
-              }`}
+                }`}
             />
             <button
               type="button"
@@ -243,15 +239,15 @@ const Register = () => {
 
         {/* Termos com checkbox estilizado */}
         <div className="flex items-start gap-3 pt-1">
-          <div className="relative mt-0.5">
+          <div className="relative mt-0.5 w-5 h-5">
             <input
               type="checkbox"
               id="termos"
-              className="peer sr-only"
+              className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               {...register('termos', { required: 'Deve aceitar os termos' })}
             />
             <div className="w-5 h-5 border-2 border-gray-300 rounded-md peer-checked:bg-brand-500 peer-checked:border-brand-500 transition-all duration-300 peer-checked:scale-110" />
-            <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="absolute top-0.5 left-0.5 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-300 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -262,7 +258,7 @@ const Register = () => {
             </Link>{' '}
             e{' '}
             <Link to="/privacidade" className="font-semibold text-brand-600 hover:text-brand-700 underline decoration-brand-300 underline-offset-2 transition-colors">
-               Política de Privacidade
+              Política de Privacidade
             </Link>
           </label>
         </div>
@@ -282,7 +278,7 @@ const Register = () => {
           >
             {/* Efeito shimmer */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full transform transition-transform duration-1000" />
-            
+
             {/* Conteúdo do botão */}
             <span className="relative z-10 flex items-center justify-center gap-2">
               {isLoading ? (
@@ -308,11 +304,11 @@ const Register = () => {
           <span className="text-xs text-gray-400 font-medium">OU</span>
           <div className="flex-1 h-px bg-gradient-to-l from-transparent to-gray-200" />
         </div>
-        
+
         <p className="text-sm text-gray-600">
           Já tem uma conta?{' '}
-          <Link 
-            to="/login" 
+          <Link
+            to="/login"
             className="font-bold text-brand-600 hover:text-brand-700 relative group/login transition-colors inline-block"
           >
             Inicie sessão aqui
